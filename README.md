@@ -6,7 +6,7 @@ server-side, logging richieste con masking, Swagger protetto da Basic Auth, suit
 di test (Jest + mongodb-memory-server).
 
 Progetto **autonomo**: si sviluppa e si esegue anche da solo, senza il repo
-`artaround` (che lo userà come submodule insieme a Navigator e Marketplace).
+`artaround` (che lo userà come submodule insieme a Navigator e Editor).
 
 > **Esecuzione: esclusivamente via Docker.** Non è previsto l'avvio nativo (`npm`
 > diretto sull'host): tutte le variabili d'ambiente sono fornite dai file
@@ -157,6 +157,7 @@ indipendente dal container `database`/`mongo` del compose.
 | `tests/integration/smoke.integration.test.js` | `/health`, `/docs-json` protetto da Basic Auth, login con API key valida, login rifiutato senza API key |
 | `tests/integration/artworks.crud.integration.test.js` | CRUD di un'opera da `super_admin`, scoping di un `author` ai musei assegnati, `visitor` in sola lettura, rifiuto senza JWT |
 | `tests/integration/seed.integration.test.js` | idempotenza del seed (il museo Uffizi resta stabile su esecuzioni ripetute) |
+| `tests/integration/uploads.integration.test.js` | upload di immagini (validazione mimetype/PNG) e servizio pubblico dell'asset caricato |
 
 Script disponibili (da `package.json`): `test`, `test:unit`, `test:integration`,
 `test:watch`, `test:ci` (con coverage su `app/src/**`).
@@ -211,7 +212,7 @@ docker compose -f docker/docker-compose.prod.yml --env-file .env run --rm backen
 ```
 
 Per il deploy sui **due container del dipartimento** (un unico container Node che
-serve API + Navigator + Marketplace, più Mongo) si usa il repo **artaround**,
+serve API + Navigator + Editor, più Mongo) si usa il repo **artaround**,
 che assembla i build dei tre componenti — questo compose di produzione standalone
 serve a validare il backend da solo, non è il percorso di consegna finale.
 
