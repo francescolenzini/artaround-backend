@@ -1,0 +1,68 @@
+# =============================================================================
+# ArtAround Backend — SVILUPPO autonomo (backend + mongo)
+# -----------------------------------------------------------------------------
+# Permette di eseguire il backend DA SOLO, senza il repo Main.
+# Eseguire dalla radice del repo backend:
+#   docker compose -f docker/docker-compose.yml up -d --build
+#   docker compose -f docker/docker-compose.yml run --rm backend npm run seed
+#
+#   API/Swagger : http://localhost:3002/docs   (Basic Auth swagger/swagger)
+#   Debugger    : porta 9229
+# =============================================================================
+
+name: artaround-backend
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: artaround-backend:dev
+    container_name: artaround-backend
+    environment:
+      NODE_ENV: development
+      PORT: "3001"
+      NODE_OPTIONS: --inspect=0.0.0.0:9229
+      CHOKIDAR_USEPOLLING: "true"
+      MONGO_URI: mongodb://${MONGO_USER:-artaround}:${MONGO_PASSWORD:-artaround}@database:27017/${MONGO_DB:-artaround}?authSource=admin
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-me}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+      SWAGGER_USER: ${SWAGGER_USER:-swagger}
+      SWAGGER_PASSWORD: ${SWAGGER_PASSWORD:-swagger}
+    ports:
+      - "3002:3001"   # host 3002 -> container 3001 (evita conflitto Docker Desktop)
+      - "9229:9229"
+    volumes:
+      - ..:/app
+      - backend_node_modules:/app/node_modules
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+  database:
+    image: mongo:7
+    container_name: artaround-backend-database
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-artaround}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-artaround}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-artaround}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          echo 'db.adminCommand({ ping: 1 })' | mongosh --quiet
+          -u $$MONGO_INITDB_ROOT_USERNAME -p $$MONGO_INITDB_ROOT_PASSWORD
+          --authenticationDatabase admin localhost:27017/admin
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+  backend_node_modules:

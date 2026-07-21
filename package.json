@@ -1,0 +1,34 @@
+{
+  "name": "artaround-backend",
+  "version": "1.0.0",
+  "private": true,
+  "main": "app/server.js",
+  "scripts": {
+    "dev": "nodemon --legacy-watch app/server.js",
+    "start": "node app/server.js",
+    "seed": "node app/src/scripts/seed.js",
+    "apikey": "node app/src/scripts/apikey-cli.js",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch",
+    "test:ci": "jest --runInBand --coverage",
+    "test:unit": "jest --runInBand tests/unit",
+    "test:integration": "jest --runInBand tests/integration"
+  },
+  "dependencies": {
+    "basic-auth": "^2.0.1",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.2",
+    "multer": "^2.2.0",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "jest": "^30.3.0",
+    "mongodb-memory-server": "^11.0.1",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.2.2"
+  }
+}

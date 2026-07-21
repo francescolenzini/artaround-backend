@@ -1,0 +1,61 @@
+# =============================================================================
+# ArtAround Backend — PRODUZIONE autonoma (solo API + mongo)
+# -----------------------------------------------------------------------------
+# Esegue il backend come servizio API standalone (senza frontend).
+# Per il deploy reale sui 2 container del dipartimento si usa invece il repo
+# artaround, che assembla backend + i due frontend in un unico container.
+#
+#   crea un file .env con i segreti (MONGO_PASSWORD, JWT_SECRET, SWAGGER_PASSWORD) — vedi README
+#   docker compose -f docker/docker-compose.prod.yml --env-file .env up -d --build
+# =============================================================================
+
+name: artaround-backend-prod
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.prod
+    image: artaround-backend:prod
+    container_name: artaround-backend
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      MONGO_URI: mongodb://${MONGO_USER:-artaround}:${MONGO_PASSWORD:?serve MONGO_PASSWORD}@mongo:27017/${MONGO_DB:-artaround}?authSource=admin
+      JWT_SECRET: ${JWT_SECRET:?serve JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+      SWAGGER_USER: ${SWAGGER_USER:-swagger}
+      SWAGGER_PASSWORD: ${SWAGGER_PASSWORD:?serve SWAGGER_PASSWORD}
+    ports:
+      - "${BACKEND_PORT:-3001}:3001"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    container_name: artaround-backend-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-artaround}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?serve MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-artaround}
+    expose:
+      - "27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          echo 'db.adminCommand({ ping: 1 })' | mongosh --quiet
+          -u $$MONGO_INITDB_ROOT_USERNAME -p $$MONGO_INITDB_ROOT_PASSWORD
+          --authenticationDatabase admin localhost:27017/admin
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  mongo_data:

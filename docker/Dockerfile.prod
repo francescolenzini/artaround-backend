@@ -1,0 +1,25 @@
+# -----------------------------------------------------------------------------
+# ArtAround Backend — immagine di PRODUZIONE (solo API, progetto autonomo)
+# Espone unicamente le API (node app/server.js). Non serve alcun frontend:
+# l'assemblaggio dei 2 container del dipartimento vive nel repo artaround.
+# -----------------------------------------------------------------------------
+# syntax=docker/dockerfile:1
+
+########################  Stage 1 — dipendenze di produzione  #################
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY package*.json ./
+RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi
+
+########################  Stage 2 — runtime  ##################################
+FROM node:20-alpine AS runtime
+ENV NODE_ENV=production
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY package*.json ./
+COPY app/ ./app/
+
+EXPOSE 3001
+USER node
+CMD ["node", "app/server.js"]
