@@ -20,6 +20,12 @@ router.get(
       filter.museumId = { $in: req.user.assignedMuseumIds || [] };
     }
 
+    // Il visitor fruisce col Navigator: vede solo le visite pubblicate, mai
+    // bozze o archiviate (che restano di competenza dei content editor).
+    if (req.user.role === 'visitor') {
+      filter.status = 'published';
+    }
+
     const result = await paginateQuery({
       model: Visit,
       req,
@@ -45,6 +51,12 @@ router.get(
 
     if (!canAccessMuseum(req.user, visit.museumId)) {
       return res.status(403).json({ error: { message: 'Forbidden', status: 403 } });
+    }
+
+    // Accesso diretto per id (URL del player): per un visitor una visita non
+    // pubblicata è come inesistente, così non se ne rivela l'esistenza.
+    if (req.user.role === 'visitor' && visit.status !== 'published') {
+      return res.status(404).json({ error: { message: 'Visit not found', status: 404 } });
     }
 
     return res.status(200).json(visit);
