@@ -6,6 +6,7 @@ const { asyncHandler } = require('../middleware/asyncHandler');
 const { canAccessMuseum, scopedMuseumFilter } = require('../services/tenant');
 const { generateEntityId } = require('../services/ids');
 const { paginateQuery } = require('../services/pagination');
+const { attachCounts } = require('../services/museumStats');
 
 const router = express.Router();
 
@@ -25,6 +26,8 @@ router.get(
       ignoreFilterFields: ['museumId'],
     });
 
+    await attachCounts(result.data);
+
     return res.status(200).json(result);
   })
 );
@@ -32,7 +35,7 @@ router.get(
 router.get(
   '/:id',
   asyncHandler(async (req, res) => {
-    const museum = await Museum.findOne({ id: req.params.id });
+    const museum = await Museum.findOne({ id: req.params.id }).lean();
 
     if (!museum) {
       return res.status(404).json({ error: { message: 'Museum not found', status: 404 } });
@@ -41,6 +44,8 @@ router.get(
     if (!canAccessMuseum(req.user, museum.id)) {
       return res.status(403).json({ error: { message: 'Forbidden', status: 403 } });
     }
+
+    await attachCounts(museum);
 
     return res.status(200).json(museum);
   })

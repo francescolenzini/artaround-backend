@@ -37,7 +37,6 @@ const visitSchema = new mongoose.Schema(
     targetAudience: { type: String },
     coverImage: { type: String },
     estimatedDurationMinutes: { type: Number, required: true },
-    estimatedDuration: { type: String },
     authorId: { type: String, required: true, index: true },
     status: { type: String, enum: ['draft', 'published', 'archived'], default: 'draft', index: true },
     steps: { type: [visitStepSchema], required: true, default: [] },

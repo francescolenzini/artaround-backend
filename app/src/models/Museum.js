@@ -16,7 +16,6 @@ const museumSchema = new mongoose.Schema(
     shortName: { type: String },
     slug: { type: String, required: true, unique: true, index: true },
     status: { type: String, enum: ['draft', 'active', 'archived'], default: 'draft', index: true },
-    logo: { type: String },
     coverImage: { type: String },
     shortDescription: { type: String, required: true },
     longDescription: { type: String },
@@ -35,9 +34,6 @@ const museumSchema = new mongoose.Schema(
     defaultLanguage: { type: String, required: true },
     supportedLanguages: { type: [String], required: true, default: [] },
     assignedCuratorIds: { type: [String], required: true, default: [] },
-    itemsCount: { type: Number, default: 0 },
-    visitsCount: { type: Number, default: 0 },
-    publishedCount: { type: Number, default: 0 },
   },
   {
     timestamps: true,
