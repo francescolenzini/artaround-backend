@@ -1458,6 +1458,41 @@ async function seed() {
 
   [visHighlights, visRinascimento, visFamiglie] = storedVisits.map((visit) => visit.id);
 
+  // ── COVER IMAGES ──────────────────────────────────────────────────────────
+  // Cover del museo (dipinto PD "Tribuna degli Uffizi") e delle tre visite. Le
+  // visite riusano i binari PD già scaricati per le opere, ma come Upload
+  // distinti (filename cover-*) così la cover della visita non è accoppiata
+  // all'asset dell'opera. In entrambi i casi si popola coverImage solo se vuoto,
+  // mirror del guard su assets[] sopra: un upload dal Marketplace non viene mai
+  // sovrascritto al re-seed.
+  async function seedCoverImage(Model, targetId, sourceBasename, coverFilename) {
+    const src = seedAssetFiles.find((f) => f.startsWith(`${sourceBasename}.`));
+    if (!src) {
+      console.warn(`  [seed] cover mancante in seed-assets/, salto: ${sourceBasename}`);
+      return;
+    }
+    const data = fs.readFileSync(path.join(SEED_ASSETS_DIR, src));
+    const ext = path.extname(src).toLowerCase();
+    await Upload.updateOne(
+      { filename: coverFilename },
+      {
+        $set: { mimeType: MIME_BY_EXT[ext], size: data.length, data, uploaderId: usrAdmin },
+        $setOnInsert: { id: generateEntityId('upl') },
+      },
+      { upsert: true }
+    );
+    const upload = await Upload.findOne({ filename: coverFilename }).select('id').lean();
+    await Model.updateOne(
+      { id: targetId, $or: [{ coverImage: { $exists: false } }, { coverImage: null }, { coverImage: '' }] },
+      { $set: { coverImage: `/uploads/${upload.id}` } }
+    );
+  }
+
+  await seedCoverImage(Museum, musUffizi, 'museum-uffizi-tribuna', 'museum-uffizi-tribuna.jpg');
+  await seedCoverImage(Visit, visHighlights, 'uo-ufz-001-nascita-di-venere', 'cover-highlights-degli-uffizi.jpg');
+  await seedCoverImage(Visit, visRinascimento, 'uo-ufz-002-primavera', 'cover-capolavori-del-rinascimento.jpg');
+  await seedCoverImage(Visit, visFamiglie, 'uo-ufz-006-madonna-del-cardellino', 'cover-uffizi-per-famiglie.jpg');
+
   // ── ACTIVITY e APIKEY ─────────────────────────────────────────────────────
 
   await upsertMany(Activity, [

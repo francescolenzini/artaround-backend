@@ -30,6 +30,8 @@ const IMAGES = [
   ['uo-ufz-010-medusa', 'Medusa (Caravaggio)'],
   ['uo-ufz-011-sacrificio-di-isacco', 'Sacrifice of Isaac (Caravaggio)'],
   ['uo-ufz-012-giuditta-e-oloferne', 'Judith Slaying Holofernes (Artemisia Gentileschi, Florence)'],
+  // Cover del museo: dipinto in pubblico dominio che raffigura gli Uffizi stessi.
+  ['museum-uffizi-tribuna', 'The Tribuna of the Uffizi'],
 ];
 
 const EXT_BY_MIME = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp' };
