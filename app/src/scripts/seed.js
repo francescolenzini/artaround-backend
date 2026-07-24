@@ -37,6 +37,7 @@ async function seed() {
   // Genera tutti gli ID prima di qualsiasi operazione async,
   // così le cross-reference tra entità sono consistenti.
   let musUffizi = generateEntityId('mus');
+  let musProva = generateEntityId('mus');
 
   let usrAdmin = generateEntityId('usr');
   let usrAutore1 = generateEntityId('usr');
@@ -138,6 +139,20 @@ async function seed() {
       services: ['audioguida', 'bookshop', 'caffetteria', 'guardaroba', 'visite guidate', 'wi-fi'],
       internalNotes: 'Museo campione per il progetto ArtAround — dati di demo.',
       assignedCuratorIds: [usrAutore1, usrAutore2],
+    },
+    {
+      id: musProva,
+      name: 'Museo di Prova',
+      shortName: 'Prova',
+      slug: 'museo-di-prova',
+      status: 'draft',
+      shortDescription: 'Museo vuoto usato per testare la selezione tra più musei.',
+      city: 'Bologna',
+      address: 'Via di Prova 1',
+      postalCode: '40100',
+      country: 'Italy',
+      defaultLanguage: 'it',
+      assignedCuratorIds: [],
     },
   ], (doc) => ({ slug: doc.slug }));
 
