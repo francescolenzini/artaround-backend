@@ -6,7 +6,6 @@ const visitStepSchema = new mongoose.Schema(
     type: { type: String, enum: ['logistics_intro', 'main_item', 'optional_item', 'transition'], required: true },
     title: { type: String, required: true },
     description: { type: String },
-    directionsFromPrevious: { type: String },
     // Una tappa = un'opera: al massimo un ArtworkItem per registro linguistico.
     // Le chiavi sono fisse (scala dei registri), i valori sono id di ArtworkItem.
     itemsByRegister: {
