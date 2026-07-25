@@ -52,6 +52,9 @@ router.post(
       expiresIn: env.jwtExpiresIn,
       user: {
         id: user.id,
+        // Il Navigator mostra nome e iniziali dell'utente nel menu account:
+        // lo username da solo non basta.
+        fullName: user.fullName,
         username: user.username,
         role: user.role,
         assignedMuseumIds: user.assignedMuseumIds,
