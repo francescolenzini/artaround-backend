@@ -1,3 +1,5 @@
+const path = require('path');
+
 const cors = require('cors');
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
@@ -19,6 +21,11 @@ const apiKeysRoutes = require('./routes/apiKeysRoutes');
 const requestLogsRoutes = require('./routes/requestLogsRoutes');
 const uploadsRoutes = require('./routes/uploadsRoutes');
 
+// Asset statici del backend (app/public): oggi solo /up.html, la pagina di
+// stato leggibile da browser. /health risponde JSON e /docs sta dietro Basic
+// Auth, quindi in fase di deploy questa e' l'unica verifica a colpo d'occhio.
+const PUBLIC_DIR = path.join(__dirname, '..', 'public');
+
 async function buildApp() {
   await connectDb();
 
@@ -26,6 +33,10 @@ async function buildApp() {
 
   app.use(express.json({ limit: '2mb' }));
   app.use(cors());
+
+  // Prima del logger: gli asset statici non devono sporcare i log richieste.
+  app.use(express.static(PUBLIC_DIR));
+
   app.use(requestLogger);
 
   app.get('/health', (_req, res) => {
