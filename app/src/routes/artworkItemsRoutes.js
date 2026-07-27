@@ -30,6 +30,18 @@ router.get(
       baseFilter.artworkId = { $in: artworks.map((artwork) => artwork.id) };
     }
 
+    // Stessa regola di /visits: il visitor fruisce col Navigator e vede solo
+    // contenuti pubblicati, mai le bozze dei content editor. Conta da quando il
+    // player carica in blocco tutte le varianti di una tappa (`?id=a,b,c`)
+    // invece di un singolo id già scelto dall'autore della visita.
+    // `status` va anche fra i campi ignorati: paginateQuery applica i query
+    // param DOPO il baseFilter, quindi senza questo un `?status=draft` esplicito
+    // sovrascriverebbe il vincolo invece di essere scartato.
+    const isVisitor = req.user.role === 'visitor';
+    if (isVisitor) {
+      baseFilter.status = 'published';
+    }
+
     const result = await paginateQuery({
       model: ArtworkItem,
       req,
@@ -38,7 +50,7 @@ router.get(
       defaultSortBy: 'createdAt',
       defaultSortOrder: 'desc',
       searchableFields: ['id', 'artworkId', 'license', 'creatorId', 'lastUpdaterId', 'content.title', 'content.screenText', 'content.ttsText'],
-      ignoreFilterFields: ['museumId'],
+      ignoreFilterFields: isVisitor ? ['museumId', 'status'] : ['museumId'],
     });
 
     return res.status(200).json(result);
