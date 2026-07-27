@@ -7,6 +7,7 @@
     "dev": "nodemon --legacy-watch app/server.js",
     "start": "node app/server.js",
     "seed": "node app/src/scripts/seed.js",
+    "migrate:visit-items": "node app/src/scripts/migrate-visit-items.js",
     "apikey": "node app/src/scripts/apikey-cli.js",
     "test": "jest --runInBand",
     "test:watch": "jest --watch",

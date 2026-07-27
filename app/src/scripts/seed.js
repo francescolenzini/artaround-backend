@@ -87,8 +87,8 @@ async function seed() {
   // specialistico in aggiunta alla coppia elementare/avanzato di base).
   let iVenereIn = generateEntityId('itm');
   let iVenereMd = generateEntityId('itm');
-  // Secondo candidato per la coppia (Venere, medio): esercita la scelta con
-  // preview nel Visit Builder.
+  // Variante "medio" lunga, di un secondo autore: è la cella (medio, 4min)
+  // della griglia della Venere.
   let iVenereMd2 = generateEntityId('itm');
   let iVenereSp = generateEntityId('itm');
   let iPrimaveraIn = generateEntityId('itm');
@@ -100,6 +100,40 @@ async function seed() {
   let iGiudittaIn = generateEntityId('itm');
   let iGiudittaMd = generateEntityId('itm');
   let iGiudittaSp = generateEntityId('itm');
+
+  // Seconda dimensione degli item, quella che le specifiche chiamano
+  // "lunghezza": sulle stesse opere vetrina, più durate per lo stesso registro.
+  // È ciò che rende "dimmi di più" un comando diverso da "troppo semplice" —
+  // il primo si muove sulla durata a registro fermo, il secondo sul registro.
+  //
+  // Regola editoriale della griglia (ragionata, non meccanica): elementare e
+  // medio coprono 1/2/4 min, avanzato 2/4 min, infantile resta solo a 1min e
+  // specialistico solo a 4min — nessun autore scrive una scheda specialistica
+  // lampo né un racconto per bambini di quattro minuti. La griglia è quindi
+  // irregolare per scelta, ed è il caso che il Navigator deve saper gestire.
+  //
+  // Scala in minuti interi e non nei secondi delle slide (3s/15s/40s): il form
+  // dell'Editor raccoglie i minuti, e un valore in secondi non sarebbe più
+  // modificabile da lì.
+  let iVenereEl2m = generateEntityId('itm');
+  let iVenereEl4m = generateEntityId('itm');
+  let iVenereMd2m = generateEntityId('itm');
+  let iVenereAv2m = generateEntityId('itm');
+  let iPrimaveraEl2m = generateEntityId('itm');
+  let iPrimaveraEl4m = generateEntityId('itm');
+  let iPrimaveraMd2m = generateEntityId('itm');
+  let iPrimaveraMd4m = generateEntityId('itm');
+  let iPrimaveraAv2m = generateEntityId('itm');
+  let iMedusaEl2m = generateEntityId('itm');
+  let iMedusaEl4m = generateEntityId('itm');
+  let iMedusaMd2m = generateEntityId('itm');
+  let iMedusaMd4m = generateEntityId('itm');
+  let iMedusaAv2m = generateEntityId('itm');
+  let iGiudittaEl2m = generateEntityId('itm');
+  let iGiudittaEl4m = generateEntityId('itm');
+  let iGiudittaMd2m = generateEntityId('itm');
+  let iGiudittaMd4m = generateEntityId('itm');
+  let iGiudittaAv2m = generateEntityId('itm');
 
   let visHighlights = generateEntityId('vis');
   let visRinascimento = generateEntityId('vis');
@@ -557,7 +591,10 @@ async function seed() {
     {
       id: iVenereMd2,
       artworkId: artVenere,
-      classification: { fruitionLength: '1min', languageCode: 'it', languageRegister: 'medio' },
+      // Cella (medio, 4min) della Venere: stesso registro di iVenereMd, durata
+      // maggiore e autore diverso. È la variante che si raggiunge dicendo
+      // "dimmi di più" senza cambiare linguaggio.
+      classification: { fruitionLength: '4min', languageCode: 'it', languageRegister: 'medio' },
       content: {
         title: 'La nascita di Venere — tra mito e tecnica',
         screenText: 'Questa versione del racconto parte dai materiali: Botticelli scelse la tempera su tela, rara all\'epoca, che rende la superficie leggera e luminosa come un affresco.\nL\'oro vero, steso a pennello sui capelli di Venere e sulle ali di Zefiro, doveva brillare alla luce delle candele.\nIl mare è costruito con semplici segni a "V" ripetuti: una soluzione quasi astratta, che non cerca il realismo ma il ritmo decorativo.\nAnche i fiori che cadono nel vento sono botanicamente riconoscibili: sono rose, il fiore sacro alla dea.',
@@ -1038,9 +1075,288 @@ async function seed() {
       creatorId: usrAutore1,
       lastUpdaterId: usrAutore1,
     },
+
+    // ── Seconda durata per registro, sulle 4 opere vetrina ─────────────────
+    // Gli item qui sotto non aggiungono registri: aggiungono *durate* a
+    // registri già coperti. Sono la ragione per cui "dimmi di più" e "troppo
+    // semplice" non finiscono sullo stesso contenuto.
+
+    // La nascita di Venere — (medio, 4min) è già iVenereMd2, sopra.
+    {
+      id: iVenereEl2m,
+      artworkId: artVenere,
+      classification: { fruitionLength: '2min', languageCode: 'it', languageRegister: 'elementare' },
+      content: {
+        title: 'La nascita di Venere — racconto guidato',
+        screenText: 'Venere, la dea della bellezza, è appena nata dalla schiuma del mare e arriva a riva su una conchiglia gigante.\nA sinistra vedi due figure che volano abbracciate: sono Zefiro, il vento di primavera, e la ninfa Aura. Soffiando insieme spingono la conchiglia verso la spiaggia, e dalle loro bocche escono anche delle rose.\nA destra una ragazza corre incontro a Venere con un mantello pieno di fiori per coprirla: è una delle Ore, le divinità che governano le stagioni.\nGuarda i capelli di Venere: Botticelli li ha dipinti lunghi e mossi dal vento, e in alcuni punti ha usato oro vero, perché brillassero alla luce delle candele.',
+        ttsText: 'Venere, la dea della bellezza, è appena nata dalla schiuma del mare e arriva a riva su una conchiglia gigante. A sinistra vedi due figure che volano abbracciate: sono Zefiro, il vento di primavera, e la ninfa Aura. Soffiando insieme spingono la conchiglia verso la spiaggia, e dalle loro bocche escono anche delle rose. A destra una ragazza corre incontro a Venere con un mantello pieno di fiori per coprirla: è una delle Ore, le divinità che governano le stagioni. Guarda i capelli di Venere: Botticelli li ha dipinti lunghi e mossi dal vento, e in alcuni punti ha usato oro vero, perché brillassero alla luce delle candele.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore1,
+      lastUpdaterId: usrAutore1,
+    },
+    {
+      id: iVenereEl4m,
+      artworkId: artVenere,
+      classification: { fruitionLength: '4min', languageCode: 'it', languageRegister: 'elementare' },
+      content: {
+        title: 'La nascita di Venere — visita approfondita',
+        screenText: 'Sei davanti a uno dei quadri più famosi del mondo, e vale la pena guardarlo con calma.\nAl centro c\'è Venere, la dea della bellezza. Secondo il mito non è nata da una madre: è nata dalla schiuma del mare, già adulta. Botticelli la mostra proprio nell\'istante in cui la sua conchiglia tocca la riva.\nA sinistra due figure volano abbracciate. Quello con le guance gonfie è Zefiro, il vento tiepido di primavera; con lui c\'è la ninfa Aura. Soffiano insieme, e il loro fiato è disegnato come tante linee dorate che attraversano il quadro. Dalle loro bocche escono rose, che è il fiore sacro a Venere.\nA destra una giovane donna corre incontro alla dea con un mantello ricamato di fiori. È una delle Ore, le divinità che si occupano delle stagioni: sta per coprire Venere, come si fa con qualcuno appena arrivato dal freddo.\nAdesso guarda il mare. Botticelli non ha provato a dipingerlo realistico: sono tante piccole "V" bianche ripetute, come i segni che farebbe un bambino. Non è un errore, è una scelta: al pittore interessava il ritmo del disegno, non l\'imitazione della realtà.\nUn\'ultima cosa da cercare: i capelli di Venere e le ali di Zefiro hanno dentro dell\'oro vero, steso a pennello. Nella penombra delle sale del Quattrocento, illuminate da candele, quei dettagli si accendevano davvero.',
+        ttsText: 'Sei davanti a uno dei quadri più famosi del mondo, e vale la pena guardarlo con calma. Al centro c\'è Venere, la dea della bellezza. Secondo il mito non è nata da una madre: è nata dalla schiuma del mare, già adulta. Botticelli la mostra proprio nell\'istante in cui la sua conchiglia tocca la riva. A sinistra due figure volano abbracciate. Quello con le guance gonfie è Zefiro, il vento tiepido di primavera; con lui c\'è la ninfa Aura. Soffiano insieme, e il loro fiato è disegnato come tante linee dorate che attraversano il quadro. Dalle loro bocche escono rose, che è il fiore sacro a Venere. A destra una giovane donna corre incontro alla dea con un mantello ricamato di fiori. È una delle Ore, le divinità che si occupano delle stagioni: sta per coprire Venere, come si fa con qualcuno appena arrivato dal freddo. Adesso guarda il mare. Botticelli non ha provato a dipingerlo realistico: sono tante piccole vu bianche ripetute, come i segni che farebbe un bambino. Non è un errore, è una scelta: al pittore interessava il ritmo del disegno, non l\'imitazione della realtà. Un\'ultima cosa da cercare: i capelli di Venere e le ali di Zefiro hanno dentro dell\'oro vero, steso a pennello. Nella penombra delle sale del Quattrocento, illuminate da candele, quei dettagli si accendevano davvero.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore2,
+      lastUpdaterId: usrAutore2,
+    },
+    {
+      id: iVenereMd2m,
+      artworkId: artVenere,
+      classification: { fruitionLength: '2min', languageCode: 'it', languageRegister: 'medio' },
+      content: {
+        title: 'La nascita di Venere — racconto esteso',
+        screenText: 'Dipinta a tempera su tela tra il 1484 e il 1486, la tavola nasce in ambiente mediceo, probabilmente per una villa di campagna: il grande formato su tela, leggero e trasportabile, era il supporto tipico della decorazione suburbana.\nIl soggetto è l\'approdo di Venere Anadiomene, la dea "nata dalle acque". A sinistra Zefiro e Aura ne sospingono la conchiglia; a destra un\'Ora le porge un manto fiorito.\nLa posa riprende il tipo statuario della Venere pudica, che Botticelli poteva studiare nella collezione medicea: una citazione dall\'antico, reinterpretata con proporzioni allungate e un contorno nitido, quasi disegnato.\nÈ un\'immagine pagana in una Firenze cristiana, e non era una provocazione: nella cultura neoplatonica del circolo di Marsilio Ficino la bellezza di Venere era letta come un gradino verso la bellezza divina.',
+        ttsText: 'Dipinta a tempera su tela tra il 1484 e il 1486, la tavola nasce in ambiente mediceo, probabilmente per una villa di campagna: il grande formato su tela, leggero e trasportabile, era il supporto tipico della decorazione suburbana. Il soggetto è l\'approdo di Venere Anadiomene, la dea nata dalle acque. A sinistra Zefiro e Aura ne sospingono la conchiglia; a destra un\'Ora le porge un manto fiorito. La posa riprende il tipo statuario della Venere pudica, che Botticelli poteva studiare nella collezione medicea: una citazione dall\'antico, reinterpretata con proporzioni allungate e un contorno nitido, quasi disegnato. È un\'immagine pagana in una Firenze cristiana, e non era una provocazione: nella cultura neoplatonica del circolo di Marsilio Ficino la bellezza di Venere era letta come un gradino verso la bellezza divina.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore1,
+      lastUpdaterId: usrAutore1,
+    },
+    {
+      id: iVenereAv2m,
+      artworkId: artVenere,
+      classification: { fruitionLength: '2min', languageCode: 'it', languageRegister: 'avanzato' },
+      content: {
+        title: 'La nascita di Venere — lettura critica in breve',
+        screenText: 'Tre nodi critici, in sintesi.\nIl primo è la fonte: l\'Anadiomene di Apelle descritta da Plinio, filtrata dagli Inni omerici e, secondo una lettura ancora discussa, dalle Stanze di Poliziano.\nIl secondo è la tecnica: tempera magra su tela, con velature di verde terra nelle carni e oro in conchiglia — una scelta che privilegia la luminosità sul rilievo, in aperta divergenza dalla ricerca volumetrica coeva.\nIl terzo è l\'antinaturalismo consapevole: la torsione del collo è anatomicamente impossibile, la spalla sinistra cade oltre il verosimile. Botticelli non sbaglia, subordina l\'anatomia alla linea.',
+        ttsText: 'Tre nodi critici, in sintesi. Il primo è la fonte: l\'Anadiomene di Apelle descritta da Plinio, filtrata dagli Inni omerici e, secondo una lettura ancora discussa, dalle Stanze di Poliziano. Il secondo è la tecnica: tempera magra su tela, con velature di verde terra nelle carni e oro in conchiglia, una scelta che privilegia la luminosità sul rilievo, in aperta divergenza dalla ricerca volumetrica coeva. Il terzo è l\'antinaturalismo consapevole: la torsione del collo è anatomicamente impossibile, la spalla sinistra cade oltre il verosimile. Botticelli non sbaglia, subordina l\'anatomia alla linea.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore2,
+      lastUpdaterId: usrAutore2,
+    },
+
+    // La Primavera
+    {
+      id: iPrimaveraEl2m,
+      artworkId: artPrimavera,
+      classification: { fruitionLength: '2min', languageCode: 'it', languageRegister: 'elementare' },
+      content: {
+        title: 'La Primavera — racconto guidato',
+        screenText: 'Guarda il quadro da destra verso sinistra, come si legge una storia.\nA destra un uomo azzurro con le guance gonfie afferra una ragazza: è Zefiro, il vento, e lei è la ninfa Cloris. Subito accanto la vedi trasformata: è diventata Flora, la dea dei fiori, e ne sparge a piene mani.\nAl centro, un po\' più indietro delle altre figure, c\'è Venere. Sopra di lei vola Cupido con gli occhi bendati e una freccia accesa.\nA sinistra tre ragazze danzano tenendosi per mano: sono le Grazie. E all\'estremo bordo Mercurio, con il bastone, allontana le nuvole per tenere lontano il brutto tempo.\nSotto i loro piedi ci sono più di cinquecento piante dipinte una per una, e quasi duecento specie diverse davvero riconoscibili.',
+        ttsText: 'Guarda il quadro da destra verso sinistra, come si legge una storia. A destra un uomo azzurro con le guance gonfie afferra una ragazza: è Zefiro, il vento, e lei è la ninfa Cloris. Subito accanto la vedi trasformata: è diventata Flora, la dea dei fiori, e ne sparge a piene mani. Al centro, un po\' più indietro delle altre figure, c\'è Venere. Sopra di lei vola Cupido con gli occhi bendati e una freccia accesa. A sinistra tre ragazze danzano tenendosi per mano: sono le Grazie. E all\'estremo bordo Mercurio, con il bastone, allontana le nuvole per tenere lontano il brutto tempo. Sotto i loro piedi ci sono più di cinquecento piante dipinte una per una, e quasi duecento specie diverse davvero riconoscibili.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore1,
+      lastUpdaterId: usrAutore1,
+    },
+    {
+      id: iPrimaveraEl4m,
+      artworkId: artPrimavera,
+      classification: { fruitionLength: '4min', languageCode: 'it', languageRegister: 'elementare' },
+      content: {
+        title: 'La Primavera — visita approfondita',
+        screenText: 'Questo quadro non racconta una storia sola: ne mette insieme diverse, tutte legate all\'arrivo della primavera. Conviene guardarlo da destra a sinistra.\nAll\'estrema destra un uomo dalla pelle azzurra esce dagli alberi e afferra una ragazza. Lui è Zefiro, il vento tiepido che porta la bella stagione; lei è la ninfa Cloris, e dalla sua bocca escono dei fiori. Un passo più a sinistra la ritrovi trasformata: ora è Flora, la dea della primavera, con un vestito coperto di fiori che sparge sul prato. È la stessa persona in due momenti diversi, dipinta due volte.\nAl centro c\'è Venere. Botticelli l\'ha messa leggermente più indietro delle altre figure, e gli alberi dietro di lei si aprono in un arco, quasi una cornice: è il suo giardino, e lei ne è la padrona di casa. Sopra di lei vola suo figlio Cupido, con gli occhi bendati, e punta una freccia verso le tre ragazze a sinistra.\nQuelle tre sono le Grazie, e danzano in cerchio tenendosi per mano. Guarda i loro veli: sono così sottili che si vede attraverso. Botticelli era famoso proprio per questo.\nAll\'estrema sinistra, l\'ultimo personaggio è Mercurio, riconoscibile dai sandali alati e dal bastone con i serpenti. Non guarda gli altri: alza il bastone verso l\'alto e allontana le poche nuvole rimaste, per proteggere il giardino.\nInfine guarda in basso. Il prato non è un fondo generico: sono state contate più di cinquecento piante dipinte una a una, di quasi duecento specie diverse, molte delle quali fiorivano davvero nella campagna fiorentina tra marzo e maggio.',
+        ttsText: 'Questo quadro non racconta una storia sola: ne mette insieme diverse, tutte legate all\'arrivo della primavera. Conviene guardarlo da destra a sinistra. All\'estrema destra un uomo dalla pelle azzurra esce dagli alberi e afferra una ragazza. Lui è Zefiro, il vento tiepido che porta la bella stagione; lei è la ninfa Cloris, e dalla sua bocca escono dei fiori. Un passo più a sinistra la ritrovi trasformata: ora è Flora, la dea della primavera, con un vestito coperto di fiori che sparge sul prato. È la stessa persona in due momenti diversi, dipinta due volte. Al centro c\'è Venere. Botticelli l\'ha messa leggermente più indietro delle altre figure, e gli alberi dietro di lei si aprono in un arco, quasi una cornice: è il suo giardino, e lei ne è la padrona di casa. Sopra di lei vola suo figlio Cupido, con gli occhi bendati, e punta una freccia verso le tre ragazze a sinistra. Quelle tre sono le Grazie, e danzano in cerchio tenendosi per mano. Guarda i loro veli: sono così sottili che si vede attraverso. Botticelli era famoso proprio per questo. All\'estrema sinistra, l\'ultimo personaggio è Mercurio, riconoscibile dai sandali alati e dal bastone con i serpenti. Non guarda gli altri: alza il bastone verso l\'alto e allontana le poche nuvole rimaste, per proteggere il giardino. Infine guarda in basso. Il prato non è un fondo generico: sono state contate più di cinquecento piante dipinte una a una, di quasi duecento specie diverse, molte delle quali fiorivano davvero nella campagna fiorentina tra marzo e maggio.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore2,
+      lastUpdaterId: usrAutore2,
+    },
+    {
+      id: iPrimaveraMd2m,
+      artworkId: artPrimavera,
+      classification: { fruitionLength: '2min', languageCode: 'it', languageRegister: 'medio' },
+      content: {
+        title: 'La Primavera — racconto esteso',
+        screenText: 'La lettura corrente procede da destra a sinistra e segue le Fasti di Ovidio: Zefiro rapisce Cloris, che nell\'unione si trasforma in Flora, dea della fioritura. Le due figure contigue sono dunque un\'unica narrazione in due tempi.\nVenere presiede il boschetto da una posizione arretrata, inquadrata dall\'arco degli alberi; Cupido bendato scocca verso le Grazie, il cui girotondo è stato letto come figurazione delle tre fasi del dono: dare, ricevere, restituire.\nMercurio, all\'estremità sinistra, dissipa le nubi con il caduceo: è il custode del giardino, non un partecipante.\nL\'insieme non illustra un testo unico ma compone un discorso sull\'amore e sulla fecondità, coerente con la cultura neoplatonica del circolo mediceo per cui il quadro fu quasi certamente eseguito.',
+        ttsText: 'La lettura corrente procede da destra a sinistra e segue i Fasti di Ovidio: Zefiro rapisce Cloris, che nell\'unione si trasforma in Flora, dea della fioritura. Le due figure contigue sono dunque un\'unica narrazione in due tempi. Venere presiede il boschetto da una posizione arretrata, inquadrata dall\'arco degli alberi; Cupido bendato scocca verso le Grazie, il cui girotondo è stato letto come figurazione delle tre fasi del dono: dare, ricevere, restituire. Mercurio, all\'estremità sinistra, dissipa le nubi con il caduceo: è il custode del giardino, non un partecipante. L\'insieme non illustra un testo unico ma compone un discorso sull\'amore e sulla fecondità, coerente con la cultura neoplatonica del circolo mediceo per cui il quadro fu quasi certamente eseguito.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore1,
+      lastUpdaterId: usrAutore1,
+    },
+    {
+      id: iPrimaveraMd4m,
+      artworkId: artPrimavera,
+      classification: { fruitionLength: '4min', languageCode: 'it', languageRegister: 'medio' },
+      content: {
+        title: 'La Primavera — racconto completo',
+        screenText: 'La tavola, di quasi tre metri di larghezza, fu eseguita intorno al 1480 e risulta inventariata nel 1499 nella casa fiorentina di Lorenzo di Pierfrancesco de\' Medici, cugino del Magnifico. Non conosciamo il testo che Botticelli doveva illustrare, e forse non esisteva: il quadro sembra piuttosto comporre più fonti in una sola immagine.\nLa sequenza narrativa va da destra a sinistra, contro l\'abitudine di lettura. Nei Fasti Ovidio fa raccontare a Flora la propria origine: era la ninfa Cloris, Zefiro la rapì, e dall\'unione nacque la sua nuova identità di dea dei fiori. Botticelli mette le due figure una accanto all\'altra, così la metamorfosi si vede accadere: dalla bocca di Cloris escono già i fiori che ricoprono la veste di Flora.\nAl centro Venere, arretrata rispetto al piano delle altre figure e incorniciata dall\'apertura del fogliame, presiede il giardino con un gesto misurato della mano. Cupido, bendato, punta le Grazie: la cecità dell\'amore è un motivo che il Quattrocento eredita dalla tradizione medievale e reinterpreta in chiave positiva.\nIl girotondo delle tre Grazie è la parte più celebre della tavola. Nella lettura neoplatonica diffusa nel circolo di Marsilio Ficino, le tre figure rappresentano i momenti del dono — dare, ricevere, restituire — e insieme i gradi attraverso cui la bellezza sensibile conduce alla bellezza intelligibile.\nMercurio chiude la composizione a sinistra. Il caduceo alzato dissipa le nubi: il suo compito è proteggere il giardino, non abitarlo, e infatti è l\'unica figura che guarda altrove.\nResta il prato, che è forse il vero prodigio tecnico dell\'opera: oltre cinquecento esemplari vegetali dipinti singolarmente, riferibili a quasi duecento specie, in larga parte identificabili e coerenti con la fioritura primaverile della campagna toscana.',
+        ttsText: 'La tavola, di quasi tre metri di larghezza, fu eseguita intorno al 1480 e risulta inventariata nel 1499 nella casa fiorentina di Lorenzo di Pierfrancesco de\' Medici, cugino del Magnifico. Non conosciamo il testo che Botticelli doveva illustrare, e forse non esisteva: il quadro sembra piuttosto comporre più fonti in una sola immagine. La sequenza narrativa va da destra a sinistra, contro l\'abitudine di lettura. Nei Fasti Ovidio fa raccontare a Flora la propria origine: era la ninfa Cloris, Zefiro la rapì, e dall\'unione nacque la sua nuova identità di dea dei fiori. Botticelli mette le due figure una accanto all\'altra, così la metamorfosi si vede accadere: dalla bocca di Cloris escono già i fiori che ricoprono la veste di Flora. Al centro Venere, arretrata rispetto al piano delle altre figure e incorniciata dall\'apertura del fogliame, presiede il giardino con un gesto misurato della mano. Cupido, bendato, punta le Grazie: la cecità dell\'amore è un motivo che il Quattrocento eredita dalla tradizione medievale e reinterpreta in chiave positiva. Il girotondo delle tre Grazie è la parte più celebre della tavola. Nella lettura neoplatonica diffusa nel circolo di Marsilio Ficino, le tre figure rappresentano i momenti del dono, dare, ricevere, restituire, e insieme i gradi attraverso cui la bellezza sensibile conduce alla bellezza intelligibile. Mercurio chiude la composizione a sinistra. Il caduceo alzato dissipa le nubi: il suo compito è proteggere il giardino, non abitarlo, e infatti è l\'unica figura che guarda altrove. Resta il prato, che è forse il vero prodigio tecnico dell\'opera: oltre cinquecento esemplari vegetali dipinti singolarmente, riferibili a quasi duecento specie, in larga parte identificabili e coerenti con la fioritura primaverile della campagna toscana.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore2,
+      lastUpdaterId: usrAutore2,
+    },
+    {
+      id: iPrimaveraAv2m,
+      artworkId: artPrimavera,
+      classification: { fruitionLength: '2min', languageCode: 'it', languageRegister: 'avanzato' },
+      content: {
+        title: 'La Primavera — lettura critica in breve',
+        screenText: 'La questione aperta non è l\'identificazione delle figure, sostanzialmente acquisita, ma lo statuto del programma iconografico.\nLa lettura warburghiana ne fa un\'illustrazione di fonti poetiche precise; la revisione novecentesca, da Gombrich in avanti, vi legge piuttosto un programma neoplatonico costruito ad hoc per l\'educazione del giovane Lorenzo di Pierfrancesco.\nLa terza posizione, oggi la più cauta, nega l\'esistenza di un testo-fonte unitario: la tavola sarebbe una composizione di motivi, non la traduzione di un testo.\nSul piano formale resta decisivo il rifiuto della prospettiva costruita: il fondo scuro annulla la profondità, le figure si dispongono su un piano quasi continuo e la costruzione è affidata al ritmo lineare.',
+        ttsText: 'La questione aperta non è l\'identificazione delle figure, sostanzialmente acquisita, ma lo statuto del programma iconografico. La lettura warburghiana ne fa un\'illustrazione di fonti poetiche precise; la revisione novecentesca, da Gombrich in avanti, vi legge piuttosto un programma neoplatonico costruito ad hoc per l\'educazione del giovane Lorenzo di Pierfrancesco. La terza posizione, oggi la più cauta, nega l\'esistenza di un testo fonte unitario: la tavola sarebbe una composizione di motivi, non la traduzione di un testo. Sul piano formale resta decisivo il rifiuto della prospettiva costruita: il fondo scuro annulla la profondità, le figure si dispongono su un piano quasi continuo e la costruzione è affidata al ritmo lineare.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore1,
+      lastUpdaterId: usrAutore1,
+    },
+
+    // Medusa
+    {
+      id: iMedusaEl2m,
+      artworkId: artMedusa,
+      classification: { fruitionLength: '2min', languageCode: 'it', languageRegister: 'elementare' },
+      content: {
+        title: 'Medusa — racconto guidato',
+        screenText: 'Quello che sembra un quadro rotondo è in realtà uno scudo di legno, ricoperto di tela e dipinto.\nSopra c\'è la testa di Medusa, il mostro del mito greco che aveva serpenti al posto dei capelli e trasformava in pietra chiunque la guardasse negli occhi.\nCaravaggio sceglie l\'istante esatto in cui l\'eroe Perseo le taglia la testa: la bocca è ancora aperta per il grido, gli occhi sono spalancati, il sangue schizza dal collo.\nIl trucco più bello è che il viso è dipinto su una superficie curva, ma sembra che la testa sporga verso di te: uno scudo che invece di proteggere sembra attaccare.\nL\'opera fu mandata in dono al granduca Ferdinando I de\' Medici, che collezionava armi e armature.',
+        ttsText: 'Quello che sembra un quadro rotondo è in realtà uno scudo di legno, ricoperto di tela e dipinto. Sopra c\'è la testa di Medusa, il mostro del mito greco che aveva serpenti al posto dei capelli e trasformava in pietra chiunque la guardasse negli occhi. Caravaggio sceglie l\'istante esatto in cui l\'eroe Perseo le taglia la testa: la bocca è ancora aperta per il grido, gli occhi sono spalancati, il sangue schizza dal collo. Il trucco più bello è che il viso è dipinto su una superficie curva, ma sembra che la testa sporga verso di te: uno scudo che invece di proteggere sembra attaccare. L\'opera fu mandata in dono al granduca Ferdinando primo de\' Medici, che collezionava armi e armature.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore2,
+      lastUpdaterId: usrAutore2,
+    },
+    {
+      id: iMedusaEl4m,
+      artworkId: artMedusa,
+      classification: { fruitionLength: '4min', languageCode: 'it', languageRegister: 'elementare' },
+      content: {
+        title: 'Medusa — visita approfondita',
+        screenText: 'Prima di guardare l\'immagine, guarda l\'oggetto: non è una tela tesa su un telaio, è uno scudo da parata. Un disco di legno di pioppo, leggermente bombato, coperto di tela e poi dipinto. Scudi come questo non servivano in battaglia: erano oggetti da cerimonia e da collezione.\nIl soggetto è Medusa. Nel mito greco era una delle tre Gorgoni, e la sua particolarità era terribile: aveva serpenti vivi al posto dei capelli e chiunque incrociasse il suo sguardo diventava di pietra. L\'eroe Perseo riuscì a ucciderla usando lo scudo come specchio, così da colpirla senza guardarla direttamente.\nCaravaggio non dipinge Perseo, e nemmeno il mostro vivo. Sceglie l\'attimo immediatamente successivo al colpo. La testa è già staccata — vedi il sangue che esce dal collo in tre getti — ma il volto non lo sa ancora: la bocca è spalancata in un grido, le sopracciglia sono sollevate, gli occhi guardano in basso con un\'espressione di puro sbigottimento. È l\'ultimo istante di coscienza, dipinto.\nI serpenti, invece, sono vivissimi. Si torcono, si sollevano, alcuni sembrano uscire dalla superficie. Caravaggio li ha dipinti con la stessa attenzione con cui altri pittori dipingevano i gioielli.\nE poi c\'è il gioco più raffinato. Lo scudo è convesso, cioè gonfio verso l\'esterno. Ma Caravaggio lo ha dipinto con le ombre di una superficie concava, cioè incavata. Il risultato è che il tuo occhio si confonde e la testa sembra venirti incontro, come se sporgesse dal disco.\nL\'oggetto fu inviato a Firenze come dono diplomatico al granduca Ferdinando I de\' Medici, appassionato collezionista di armature. Per secoli è rimasto nell\'Armeria medicea, insieme alle armi vere.',
+        ttsText: 'Prima di guardare l\'immagine, guarda l\'oggetto: non è una tela tesa su un telaio, è uno scudo da parata. Un disco di legno di pioppo, leggermente bombato, coperto di tela e poi dipinto. Scudi come questo non servivano in battaglia: erano oggetti da cerimonia e da collezione. Il soggetto è Medusa. Nel mito greco era una delle tre Gorgoni, e la sua particolarità era terribile: aveva serpenti vivi al posto dei capelli e chiunque incrociasse il suo sguardo diventava di pietra. L\'eroe Perseo riuscì a ucciderla usando lo scudo come specchio, così da colpirla senza guardarla direttamente. Caravaggio non dipinge Perseo, e nemmeno il mostro vivo. Sceglie l\'attimo immediatamente successivo al colpo. La testa è già staccata, vedi il sangue che esce dal collo in tre getti, ma il volto non lo sa ancora: la bocca è spalancata in un grido, le sopracciglia sono sollevate, gli occhi guardano in basso con un\'espressione di puro sbigottimento. È l\'ultimo istante di coscienza, dipinto. I serpenti, invece, sono vivissimi. Si torcono, si sollevano, alcuni sembrano uscire dalla superficie. Caravaggio li ha dipinti con la stessa attenzione con cui altri pittori dipingevano i gioielli. E poi c\'è il gioco più raffinato. Lo scudo è convesso, cioè gonfio verso l\'esterno. Ma Caravaggio lo ha dipinto con le ombre di una superficie concava, cioè incavata. Il risultato è che il tuo occhio si confonde e la testa sembra venirti incontro, come se sporgesse dal disco. L\'oggetto fu inviato a Firenze come dono diplomatico al granduca Ferdinando primo de\' Medici, appassionato collezionista di armature. Per secoli è rimasto nell\'Armeria medicea, insieme alle armi vere.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore1,
+      lastUpdaterId: usrAutore1,
+    },
+    {
+      id: iMedusaMd2m,
+      artworkId: artMedusa,
+      classification: { fruitionLength: '2min', languageCode: 'it', languageRegister: 'medio' },
+      content: {
+        title: 'Medusa — racconto esteso',
+        screenText: 'Il supporto è uno scudo da parata in legno di pioppo rivestito di tela, eseguito intorno al 1597-1598 su commissione del cardinale Francesco Maria Del Monte, protettore di Caravaggio, e destinato in dono a Ferdinando I de\' Medici.\nLa scelta del soggetto è colta: lo scudo con la Gorgone rimanda all\'egida di Atena, e in chiave encomiastica al principe che pietrifica i nemici.\nCaravaggio fissa l\'istante fra la decapitazione e la morte. Il volto è ancora percorso dalla coscienza — bocca aperta, sopracciglia inarcate, sguardo abbassato — mentre il sangue erompe dal collo in getti già inerti.\nLa contraddizione ottica è deliberata: su una superficie convessa il pittore dipinge il chiaroscuro di una concava, e la testa pare aggettare verso chi guarda. Il volto, secondo una tradizione antica, sarebbe un autoritratto allo specchio.',
+        ttsText: 'Il supporto è uno scudo da parata in legno di pioppo rivestito di tela, eseguito intorno al millecinquecentonovantasette su commissione del cardinale Francesco Maria Del Monte, protettore di Caravaggio, e destinato in dono a Ferdinando primo de\' Medici. La scelta del soggetto è colta: lo scudo con la Gorgone rimanda all\'egida di Atena, e in chiave encomiastica al principe che pietrifica i nemici. Caravaggio fissa l\'istante fra la decapitazione e la morte. Il volto è ancora percorso dalla coscienza, bocca aperta, sopracciglia inarcate, sguardo abbassato, mentre il sangue erompe dal collo in getti già inerti. La contraddizione ottica è deliberata: su una superficie convessa il pittore dipinge il chiaroscuro di una concava, e la testa pare aggettare verso chi guarda. Il volto, secondo una tradizione antica, sarebbe un autoritratto allo specchio.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore1,
+      lastUpdaterId: usrAutore1,
+    },
+    {
+      id: iMedusaMd4m,
+      artworkId: artMedusa,
+      classification: { fruitionLength: '4min', languageCode: 'it', languageRegister: 'medio' },
+      content: {
+        title: 'Medusa — racconto completo',
+        screenText: 'L\'opera che hai davanti nasce come oggetto d\'arme, non come quadro. È uno scudo da parata: un disco convesso in legno di pioppo, di poco meno di settanta centimetri, rivestito di tela gessata e poi dipinto a olio. La destinazione era l\'Armeria medicea, dove rimase per secoli accanto alle armature autentiche.\nLa commissione risale al 1597-1598 e si deve al cardinale Francesco Maria Del Monte, primo protettore romano di Caravaggio, che ne fece un dono diplomatico a Ferdinando I de\' Medici. La scelta iconografica è tutt\'altro che casuale: lo scudo con la testa della Gorgone è l\'egida di Atena, e in chiave celebrativa allude al principe capace di pietrificare i propri nemici. Un\'arma che vince senza colpire.\nIl racconto mitico è noto: Medusa, unica mortale fra le tre Gorgoni, pietrificava chiunque ne incrociasse lo sguardo; Perseo la decapitò servendosi del proprio scudo come specchio. Caravaggio, però, non illustra l\'impresa. Isola un istante brevissimo, quello fra il taglio e la morte, e lo tratta come un fatto fisiologico prima che eroico.\nDi qui la costruzione del volto: la bocca è spalancata su un grido che non sentiamo, le sopracciglia si sollevano al centro, lo sguardo cade verso il basso in un\'espressione più di incredulità che di dolore. Il sangue esce dal collo in getti che il pittore rende già privi di forza. La testa, insomma, è viva ancora per un attimo e lo sa.\nAttorno, i serpenti sono trattati con una precisione quasi naturalistica: si attorcigliano, si sollevano, uno si morde. Sono l\'unica parte dell\'opera in cui la pittura indugia sul dettaglio decorativo.\nResta l\'invenzione ottica, che è il vero motivo della fama dell\'opera. La superficie è convessa, ma il chiaroscuro è quello di una superficie concava: l\'occhio riceve due informazioni contraddittorie e risolve il conflitto facendo aggettare la testa verso l\'esterno. Lo scudo, oggetto difensivo per definizione, si comporta visivamente come una minaccia.\nUna tradizione antica, non verificabile ma tenace, vuole che il volto sia un autoritratto dipinto allo specchio: l\'artista che si ritrae nell\'istante in cui viene decapitato.',
+        ttsText: 'L\'opera che hai davanti nasce come oggetto d\'arme, non come quadro. È uno scudo da parata: un disco convesso in legno di pioppo, di poco meno di settanta centimetri, rivestito di tela gessata e poi dipinto a olio. La destinazione era l\'Armeria medicea, dove rimase per secoli accanto alle armature autentiche. La commissione risale al millecinquecentonovantasette e si deve al cardinale Francesco Maria Del Monte, primo protettore romano di Caravaggio, che ne fece un dono diplomatico a Ferdinando primo de\' Medici. La scelta iconografica è tutt\'altro che casuale: lo scudo con la testa della Gorgone è l\'egida di Atena, e in chiave celebrativa allude al principe capace di pietrificare i propri nemici. Un\'arma che vince senza colpire. Il racconto mitico è noto: Medusa, unica mortale fra le tre Gorgoni, pietrificava chiunque ne incrociasse lo sguardo; Perseo la decapitò servendosi del proprio scudo come specchio. Caravaggio, però, non illustra l\'impresa. Isola un istante brevissimo, quello fra il taglio e la morte, e lo tratta come un fatto fisiologico prima che eroico. Di qui la costruzione del volto: la bocca è spalancata su un grido che non sentiamo, le sopracciglia si sollevano al centro, lo sguardo cade verso il basso in un\'espressione più di incredulità che di dolore. Il sangue esce dal collo in getti che il pittore rende già privi di forza. La testa, insomma, è viva ancora per un attimo e lo sa. Attorno, i serpenti sono trattati con una precisione quasi naturalistica: si attorcigliano, si sollevano, uno si morde. Sono l\'unica parte dell\'opera in cui la pittura indugia sul dettaglio decorativo. Resta l\'invenzione ottica, che è il vero motivo della fama dell\'opera. La superficie è convessa, ma il chiaroscuro è quello di una superficie concava: l\'occhio riceve due informazioni contraddittorie e risolve il conflitto facendo aggettare la testa verso l\'esterno. Lo scudo, oggetto difensivo per definizione, si comporta visivamente come una minaccia. Una tradizione antica, non verificabile ma tenace, vuole che il volto sia un autoritratto dipinto allo specchio: l\'artista che si ritrae nell\'istante in cui viene decapitato.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore2,
+      lastUpdaterId: usrAutore2,
+    },
+    {
+      id: iMedusaAv2m,
+      artworkId: artMedusa,
+      classification: { fruitionLength: '2min', languageCode: 'it', languageRegister: 'avanzato' },
+      content: {
+        title: 'Medusa — lettura critica in breve',
+        screenText: 'Tre elementi qualificano l\'opera nel percorso caravaggesco degli anni Del Monte.\nIl primo è la contraddizione fra supporto e resa: chiaroscuro concavo su superficie convessa, un artificio che sposta l\'opera dal piano della rappresentazione a quello dell\'inganno percettivo, in linea con la cultura del meraviglioso di fine secolo.\nIl secondo è il trattamento del tempo. Caravaggio isola una frazione post mortem in cui la coscienza sopravvive al corpo: una scelta che anticipa la drammaturgia dell\'istante delle opere romane mature.\nIl terzo è lo statuto del ritratto. L\'identificazione con l\'autoritratto allo specchio, priva di conferme documentarie, resta plausibile sul piano tecnico e coerente con la prassi giovanile del pittore.',
+        ttsText: 'Tre elementi qualificano l\'opera nel percorso caravaggesco degli anni Del Monte. Il primo è la contraddizione fra supporto e resa: chiaroscuro concavo su superficie convessa, un artificio che sposta l\'opera dal piano della rappresentazione a quello dell\'inganno percettivo, in linea con la cultura del meraviglioso di fine secolo. Il secondo è il trattamento del tempo. Caravaggio isola una frazione post mortem in cui la coscienza sopravvive al corpo: una scelta che anticipa la drammaturgia dell\'istante delle opere romane mature. Il terzo è lo statuto del ritratto. L\'identificazione con l\'autoritratto allo specchio, priva di conferme documentarie, resta plausibile sul piano tecnico e coerente con la prassi giovanile del pittore.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore2,
+      lastUpdaterId: usrAutore2,
+    },
+
+    // Giuditta e Oloferne
+    {
+      id: iGiudittaEl2m,
+      artworkId: artGiuditta,
+      classification: { fruitionLength: '2min', languageCode: 'it', languageRegister: 'elementare' },
+      content: {
+        title: 'Giuditta e Oloferne — racconto guidato',
+        screenText: 'La storia viene dalla Bibbia. Oloferne è un generale nemico che assedia la città di Betulia; Giuditta, una donna della città, entra nel suo accampamento fingendosi alleata, aspetta che si ubriachi e lo uccide nel sonno.\nArtemisia Gentileschi sceglie il momento più duro: la decapitazione mentre sta accadendo.\nGuarda come sono disposte le figure. Giuditta tiene la spada con entrambe le braccia e allontana il corpo da sé; la serva Abra non aspetta in disparte, come nella maggior parte dei quadri su questo tema, ma blocca Oloferne con tutto il proprio peso. Sono due donne che lavorano insieme.\nArtemisia dipinse questa tela poco dopo il processo per la violenza subita dal pittore Agostino Tassi, e molti studiosi leggono in quella forza una risposta personale.',
+        ttsText: 'La storia viene dalla Bibbia. Oloferne è un generale nemico che assedia la città di Betulia; Giuditta, una donna della città, entra nel suo accampamento fingendosi alleata, aspetta che si ubriachi e lo uccide nel sonno. Artemisia Gentileschi sceglie il momento più duro: la decapitazione mentre sta accadendo. Guarda come sono disposte le figure. Giuditta tiene la spada con entrambe le braccia e allontana il corpo da sé; la serva Abra non aspetta in disparte, come nella maggior parte dei quadri su questo tema, ma blocca Oloferne con tutto il proprio peso. Sono due donne che lavorano insieme. Artemisia dipinse questa tela poco dopo il processo per la violenza subita dal pittore Agostino Tassi, e molti studiosi leggono in quella forza una risposta personale.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore2,
+      lastUpdaterId: usrAutore2,
+    },
+    {
+      id: iGiudittaEl4m,
+      artworkId: artGiuditta,
+      classification: { fruitionLength: '4min', languageCode: 'it', languageRegister: 'elementare' },
+      content: {
+        title: 'Giuditta e Oloferne — visita approfondita',
+        screenText: 'Il racconto è nel Libro di Giuditta, uno dei testi dell\'Antico Testamento. La città ebraica di Betulia è assediata dall\'esercito assiro, guidato dal generale Oloferne, e sta per arrendersi. Giuditta, una vedova della città, decide di agire da sola: si presenta al campo nemico dicendo di voler passare dalla loro parte, si guadagna la fiducia di Oloferne, aspetta che una sera beva troppo e, quando resta sola con lui nella tenda, gli taglia la testa con la sua stessa spada.\nQuasi tutti i pittori che hanno affrontato questa storia hanno scelto il dopo: Giuditta che si allontana con la testa avvolta in un panno, il volto composto. Artemisia Gentileschi sceglie invece il durante, e non risparmia nulla.\nOsserva la costruzione della scena. Il corpo di Oloferne occupa il centro in diagonale; si è svegliato e sta cercando di reagire, e infatti il suo braccio spinge verso l\'alto. Giuditta è a destra, appoggiata sulle gambe divaricate per avere stabilità, e tiene la spada con entrambe le mani mentre con la sinistra allontana da sé la testa dell\'uomo: è un gesto pratico, non eroico, di chi non vuole sporcarsi.\nLa vera differenza è la serva. Nella tradizione figurativa Abra aspetta fuori dalla tenda, o al massimo regge il sacco. Qui è dentro la scena a pieno titolo: si getta sul petto di Oloferne con tutto il corpo per tenerlo fermo. La decapitazione diventa un\'azione a quattro braccia.\nLa luce arriva da sinistra, tagliente, e illumina solo ciò che serve: i volti concentrati delle due donne, il braccio dell\'uomo, la lama. Il resto sprofonda nel buio. È il linguaggio di Caravaggio, che Artemisia conosceva bene attraverso il padre Orazio.\nUn ultimo dato, che aiuta a capire la tela. Artemisia la dipinse tra il 1620 e il 1621, pochi anni dopo il processo pubblico contro il pittore Agostino Tassi, che l\'aveva violentata quando lei aveva diciassette anni. Molti studiosi hanno letto in questa Giuditta così determinata una risposta a quella vicenda. Altri invitano alla prudenza. Il quadro, in ogni caso, non chiede compassione: chiede di guardare.',
+        ttsText: 'Il racconto è nel Libro di Giuditta, uno dei testi dell\'Antico Testamento. La città ebraica di Betulia è assediata dall\'esercito assiro, guidato dal generale Oloferne, e sta per arrendersi. Giuditta, una vedova della città, decide di agire da sola: si presenta al campo nemico dicendo di voler passare dalla loro parte, si guadagna la fiducia di Oloferne, aspetta che una sera beva troppo e, quando resta sola con lui nella tenda, gli taglia la testa con la sua stessa spada. Quasi tutti i pittori che hanno affrontato questa storia hanno scelto il dopo: Giuditta che si allontana con la testa avvolta in un panno, il volto composto. Artemisia Gentileschi sceglie invece il durante, e non risparmia nulla. Osserva la costruzione della scena. Il corpo di Oloferne occupa il centro in diagonale; si è svegliato e sta cercando di reagire, e infatti il suo braccio spinge verso l\'alto. Giuditta è a destra, appoggiata sulle gambe divaricate per avere stabilità, e tiene la spada con entrambe le mani mentre con la sinistra allontana da sé la testa dell\'uomo: è un gesto pratico, non eroico, di chi non vuole sporcarsi. La vera differenza è la serva. Nella tradizione figurativa Abra aspetta fuori dalla tenda, o al massimo regge il sacco. Qui è dentro la scena a pieno titolo: si getta sul petto di Oloferne con tutto il corpo per tenerlo fermo. La decapitazione diventa un\'azione a quattro braccia. La luce arriva da sinistra, tagliente, e illumina solo ciò che serve: i volti concentrati delle due donne, il braccio dell\'uomo, la lama. Il resto sprofonda nel buio. È il linguaggio di Caravaggio, che Artemisia conosceva bene attraverso il padre Orazio. Un ultimo dato, che aiuta a capire la tela. Artemisia la dipinse tra il milleseicentoventi e il milleseicentoventuno, pochi anni dopo il processo pubblico contro il pittore Agostino Tassi, che l\'aveva violentata quando lei aveva diciassette anni. Molti studiosi hanno letto in questa Giuditta così determinata una risposta a quella vicenda. Altri invitano alla prudenza. Il quadro, in ogni caso, non chiede compassione: chiede di guardare.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore1,
+      lastUpdaterId: usrAutore1,
+    },
+    {
+      id: iGiudittaMd2m,
+      artworkId: artGiuditta,
+      classification: { fruitionLength: '2min', languageCode: 'it', languageRegister: 'medio' },
+      content: {
+        title: 'Giuditta e Oloferne — racconto esteso',
+        screenText: 'La tela, databile al 1620-1621, riprende un soggetto che Artemisia aveva già affrontato a Napoli e che qui porta alla massima tensione.\nRispetto alla tradizione iconografica la novità sta nella distribuzione dei ruoli: la serva Abra, di norma relegata al margine o all\'attesa, partecipa fisicamente all\'azione immobilizzando il corpo del generale. La decapitazione è un\'impresa condivisa, non un gesto solitario.\nLa costruzione è caravaggesca nella luce — un fascio radente da sinistra che isola i volti e la lama lasciando il resto nel buio — ma se ne distacca nella regia dei corpi, disposti secondo diagonali che si contrastano.\nLa critica ha spesso letto la tela in rapporto al processo del 1612 contro Agostino Tassi; l\'ipotesi è suggestiva e va maneggiata con cautela, perché il tema era già ampiamente diffuso nella pittura del tempo.',
+        ttsText: 'La tela, databile al milleseicentoventi, riprende un soggetto che Artemisia aveva già affrontato a Napoli e che qui porta alla massima tensione. Rispetto alla tradizione iconografica la novità sta nella distribuzione dei ruoli: la serva Abra, di norma relegata al margine o all\'attesa, partecipa fisicamente all\'azione immobilizzando il corpo del generale. La decapitazione è un\'impresa condivisa, non un gesto solitario. La costruzione è caravaggesca nella luce, un fascio radente da sinistra che isola i volti e la lama lasciando il resto nel buio, ma se ne distacca nella regia dei corpi, disposti secondo diagonali che si contrastano. La critica ha spesso letto la tela in rapporto al processo del milleseicentododici contro Agostino Tassi; l\'ipotesi è suggestiva e va maneggiata con cautela, perché il tema era già ampiamente diffuso nella pittura del tempo.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore1,
+      lastUpdaterId: usrAutore1,
+    },
+    {
+      id: iGiudittaMd4m,
+      artworkId: artGiuditta,
+      classification: { fruitionLength: '4min', languageCode: 'it', languageRegister: 'medio' },
+      content: {
+        title: 'Giuditta e Oloferne — racconto completo',
+        screenText: 'Il soggetto viene dal Libro di Giuditta: assediata Betulia dall\'esercito assiro, la vedova Giuditta si introduce nel campo nemico con un pretesto, guadagna la fiducia del generale Oloferne e, approfittandone dell\'ubriachezza, lo decapita con la sua stessa spada, salvando la città.\nNella pittura del Cinque e Seicento il tema è frequentissimo, ma quasi sempre declinato nel momento successivo all\'atto: Giuditta che esce dalla tenda con la testa, il volto composto in un\'espressione di trionfo o di mesta gravità. La scelta di Artemisia Gentileschi è un\'altra: rappresentare l\'azione mentre si compie, con tutte le sue implicazioni fisiche.\nLa composizione è organizzata su diagonali contrapposte. Il corpo di Oloferne taglia la tela obliquamente, dal fondo verso lo spettatore; il braccio sollevato tenta la reazione ed è l\'unico segnale che l\'uomo si è svegliato. Giuditta occupa il lato destro con una postura solidamente piantata: le gambe divaricate per il bilanciamento, il braccio destro sulla spada, il sinistro che tiene la testa a distanza, in un gesto di puntualità pratica lontanissimo dall\'enfasi eroica.\nIl nodo iconografico decisivo è però la serva. Nella tradizione figurativa Abra attende all\'esterno o al più regge il sacco; nella tela degli Uffizi è dentro l\'azione, gettata con tutto il peso sul torace del generale per immobilizzarlo. La violenza diventa un\'operazione a quattro braccia, e con essa cambia il significato complessivo della scena: non un miracolo compiuto da una figura eletta, ma un lavoro.\nSul piano formale il linguaggio è quello caravaggesco che Artemisia aveva assimilato attraverso il padre Orazio e l\'ambiente romano: fascio luminoso radente da sinistra, fondo assorbito nel buio, selezione degli elementi illuminati secondo un criterio narrativo — i volti concentrati, il braccio, la lama, il rosso del panneggio. Ma la costruzione dello spazio è più asciutta e la fisicità dei corpi più marcata di quanto Caravaggio stesso avrebbe fatto.\nResta la questione biografica. La tela fu eseguita tra il 1620 e il 1621, nove anni dopo il processo intentato dal padre contro Agostino Tassi per la violenza subita da Artemisia diciassettenne. Una parte cospicua della critica novecentesca ha letto la determinazione della protagonista come elaborazione di quella vicenda. La lettura è legittima ma va tenuta insieme a un dato di contesto: il soggetto era già estremamente richiesto dal mercato, e Artemisia lo replicò più volte su commissione.',
+        ttsText: 'Il soggetto viene dal Libro di Giuditta: assediata Betulia dall\'esercito assiro, la vedova Giuditta si introduce nel campo nemico con un pretesto, guadagna la fiducia del generale Oloferne e, approfittando della sua ubriachezza, lo decapita con la sua stessa spada, salvando la città. Nella pittura del Cinque e Seicento il tema è frequentissimo, ma quasi sempre declinato nel momento successivo all\'atto: Giuditta che esce dalla tenda con la testa, il volto composto in un\'espressione di trionfo o di mesta gravità. La scelta di Artemisia Gentileschi è un\'altra: rappresentare l\'azione mentre si compie, con tutte le sue implicazioni fisiche. La composizione è organizzata su diagonali contrapposte. Il corpo di Oloferne taglia la tela obliquamente, dal fondo verso lo spettatore; il braccio sollevato tenta la reazione ed è l\'unico segnale che l\'uomo si è svegliato. Giuditta occupa il lato destro con una postura solidamente piantata: le gambe divaricate per il bilanciamento, il braccio destro sulla spada, il sinistro che tiene la testa a distanza, in un gesto di puntualità pratica lontanissimo dall\'enfasi eroica. Il nodo iconografico decisivo è però la serva. Nella tradizione figurativa Abra attende all\'esterno o al più regge il sacco; nella tela degli Uffizi è dentro l\'azione, gettata con tutto il peso sul torace del generale per immobilizzarlo. La violenza diventa un\'operazione a quattro braccia, e con essa cambia il significato complessivo della scena: non un miracolo compiuto da una figura eletta, ma un lavoro. Sul piano formale il linguaggio è quello caravaggesco che Artemisia aveva assimilato attraverso il padre Orazio e l\'ambiente romano: fascio luminoso radente da sinistra, fondo assorbito nel buio, selezione degli elementi illuminati secondo un criterio narrativo, i volti concentrati, il braccio, la lama, il rosso del panneggio. Ma la costruzione dello spazio è più asciutta e la fisicità dei corpi più marcata di quanto Caravaggio stesso avrebbe fatto. Resta la questione biografica. La tela fu eseguita tra il milleseicentoventi e il milleseicentoventuno, nove anni dopo il processo intentato dal padre contro Agostino Tassi per la violenza subita da Artemisia diciassettenne. Una parte cospicua della critica novecentesca ha letto la determinazione della protagonista come elaborazione di quella vicenda. La lettura è legittima ma va tenuta insieme a un dato di contesto: il soggetto era già estremamente richiesto dal mercato, e Artemisia lo replicò più volte su commissione.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore2,
+      lastUpdaterId: usrAutore2,
+    },
+    {
+      id: iGiudittaAv2m,
+      artworkId: artGiuditta,
+      classification: { fruitionLength: '2min', languageCode: 'it', languageRegister: 'avanzato' },
+      content: {
+        title: 'Giuditta e Oloferne — lettura critica in breve',
+        screenText: 'Il punto critico non è il caravaggismo dichiarato, ma la ristrutturazione del tipo iconografico.\nSpostando Abra da testimone ad agente, Artemisia converte un\'immagine di elezione provvidenziale in una scena di azione coordinata: la protagonista perde l\'aura e acquista competenza operativa. È una modifica strutturale, non un accento.\nSul piano formale la regia per diagonali contrapposte e il taglio ravvicinato producono una compressione dello spazio che il modello caravaggesco, più teatrale, non conosce.\nQuanto alla lettura biografica in chiave di rivalsa sul processo Tassi, va contestualizzata: il soggetto era di forte domanda sul mercato e l\'artista lo replicò in più redazioni. La coincidenza cronologica è un indizio, non una dimostrazione.',
+        ttsText: 'Il punto critico non è il caravaggismo dichiarato, ma la ristrutturazione del tipo iconografico. Spostando Abra da testimone ad agente, Artemisia converte un\'immagine di elezione provvidenziale in una scena di azione coordinata: la protagonista perde l\'aura e acquista competenza operativa. È una modifica strutturale, non un accento. Sul piano formale la regia per diagonali contrapposte e il taglio ravvicinato producono una compressione dello spazio che il modello caravaggesco, più teatrale, non conosce. Quanto alla lettura biografica in chiave di rivalsa sul processo Tassi, va contestualizzata: il soggetto era di forte domanda sul mercato e l\'artista lo replicò in più redazioni. La coincidenza cronologica è un indizio, non una dimostrazione.',
+      },
+      isFree: true,
+      status: 'published',
+      creatorId: usrAutore1,
+      lastUpdaterId: usrAutore1,
+    },
   ], (doc) => ({
-    // Il titolo distingue anche i candidati multipli sullo stesso registro
-    // (es. i due "medio" della Nascita di Venere).
+    // Il titolo distingue le varianti della stessa opera, comprese quelle che
+    // condividono il registro e differiscono solo per durata.
     artworkId: doc.artworkId,
     'content.title': doc.content.title,
   }));
@@ -1094,20 +1410,72 @@ async function seed() {
   iGiudittaMd = itemByTitle('Giuditta e Oloferne — racconto');
   iGiudittaSp = itemByTitle('Giuditta e Oloferne — scheda specialistica');
 
-  // Mappe registro→item riusate dagli step delle visite: la stessa tappa serve
-  // tutti i registri disponibili per quell'opera.
-  const venereRegisters = { infantile: iVenereIn, elementare: iVenereEl, medio: iVenereMd, avanzato: iVenereAv, specialistico: iVenereSp };
-  const primaveraRegisters = { infantile: iPrimaveraIn, elementare: iPrimaveraEl, medio: iPrimaveraMd, avanzato: iPrimaveraAv, specialistico: iPrimaveraSp };
-  const medusaRegisters = { infantile: iMedusaIn, elementare: iMedusaEl, medio: iMedusaMd, avanzato: iMedusaAv, specialistico: iMedusaSp };
-  const giudittaRegisters = { infantile: iGiudittaIn, elementare: iGiudittaEl, medio: iGiudittaMd, avanzato: iGiudittaAv, specialistico: iGiudittaSp };
-  const annunciazioneRegisters = { elementare: iAnnunciazioneEl, avanzato: iAnnunciazioneAv };
-  const adorazioneRegisters = { elementare: iAdorazioneEl, avanzato: iAdorazioneAv };
-  const tondoDoniRegisters = { elementare: iTondoDoniEl, avanzato: iTondoDoniAv };
-  const madonnaRegisters = { elementare: iMadonnaEl, avanzato: iMadonnaAv };
-  const leoneXRegisters = { elementare: iLeoneXEl, avanzato: iLeoneXAv };
-  const venereUrbinoRegisters = { elementare: iVenereUrbinoEl, avanzato: iVenereUrbinoAv };
-  const floraRegisters = { elementare: iFloraEl, avanzato: iFloraAv };
-  const sacrificioRegisters = { elementare: iSacrifEl, avanzato: iSacrifAv };
+  iVenereEl2m = itemByTitle('La nascita di Venere — racconto guidato');
+  iVenereEl4m = itemByTitle('La nascita di Venere — visita approfondita');
+  iVenereMd2m = itemByTitle('La nascita di Venere — racconto esteso');
+  iVenereAv2m = itemByTitle('La nascita di Venere — lettura critica in breve');
+  iPrimaveraEl2m = itemByTitle('La Primavera — racconto guidato');
+  iPrimaveraEl4m = itemByTitle('La Primavera — visita approfondita');
+  iPrimaveraMd2m = itemByTitle('La Primavera — racconto esteso');
+  iPrimaveraMd4m = itemByTitle('La Primavera — racconto completo');
+  iPrimaveraAv2m = itemByTitle('La Primavera — lettura critica in breve');
+  iMedusaEl2m = itemByTitle('Medusa — racconto guidato');
+  iMedusaEl4m = itemByTitle('Medusa — visita approfondita');
+  iMedusaMd2m = itemByTitle('Medusa — racconto esteso');
+  iMedusaMd4m = itemByTitle('Medusa — racconto completo');
+  iMedusaAv2m = itemByTitle('Medusa — lettura critica in breve');
+  iGiudittaEl2m = itemByTitle('Giuditta e Oloferne — racconto guidato');
+  iGiudittaEl4m = itemByTitle('Giuditta e Oloferne — visita approfondita');
+  iGiudittaMd2m = itemByTitle('Giuditta e Oloferne — racconto esteso');
+  iGiudittaMd4m = itemByTitle('Giuditta e Oloferne — racconto completo');
+  iGiudittaAv2m = itemByTitle('Giuditta e Oloferne — lettura critica in breve');
+
+  // Varianti dell'opera riusate dagli step delle visite: una tappa mette a
+  // disposizione tutte le varianti disponibili per quell'opera, e il player le
+  // dispone da sé sui due assi leggendo registro e durata da ogni item.
+  // L'ordine è quello della scala dei registri, poi della durata crescente —
+  // conta solo per la leggibilità della lista nell'Editor, non per il player.
+  //
+  // Opere vetrina: griglia registro × durata con più celle per riga.
+  const venereVariants = [
+    iVenereIn,                                  // infantile  1min
+    iVenereEl, iVenereEl2m, iVenereEl4m,        // elementare 1/2/4min
+    iVenereMd, iVenereMd2m, iVenereMd2,         // medio      1/2/4min
+    iVenereAv2m, iVenereAv,                     // avanzato   2/4min
+    iVenereSp,                                  // specialistico 4min
+  ];
+  const primaveraVariants = [
+    iPrimaveraIn,
+    iPrimaveraEl, iPrimaveraEl2m, iPrimaveraEl4m,
+    iPrimaveraMd, iPrimaveraMd2m, iPrimaveraMd4m,
+    iPrimaveraAv2m, iPrimaveraAv,
+    iPrimaveraSp,
+  ];
+  const medusaVariants = [
+    iMedusaIn,
+    iMedusaEl, iMedusaEl2m, iMedusaEl4m,
+    iMedusaMd, iMedusaMd2m, iMedusaMd4m,
+    iMedusaAv2m, iMedusaAv,
+    iMedusaSp,
+  ];
+  const giudittaVariants = [
+    iGiudittaIn,
+    iGiudittaEl, iGiudittaEl2m, iGiudittaEl4m,
+    iGiudittaMd, iGiudittaMd2m, iGiudittaMd4m,
+    iGiudittaAv2m, iGiudittaAv,
+    iGiudittaSp,
+  ];
+  // Opere con copertura minima: due sole varianti, una per estremo della scala.
+  // È il caso rado che il Navigator deve gestire ripiegando sulla variante più
+  // vicina invece di pretendere la cella esatta.
+  const annunciazioneVariants = [iAnnunciazioneEl, iAnnunciazioneAv];
+  const adorazioneVariants = [iAdorazioneEl, iAdorazioneAv];
+  const tondoDoniVariants = [iTondoDoniEl, iTondoDoniAv];
+  const madonnaVariants = [iMadonnaEl, iMadonnaAv];
+  const leoneXVariants = [iLeoneXEl, iLeoneXAv];
+  const venereUrbinoVariants = [iVenereUrbinoEl, iVenereUrbinoAv];
+  const floraVariants = [iFloraEl, iFloraAv];
+  const sacrificioVariants = [iSacrifEl, iSacrifAv];
 
   // ── VISITE ────────────────────────────────────────────────────────────────
 
@@ -1124,7 +1492,7 @@ async function seed() {
       status: 'published',
       steps: [
         {
-          id: generateEntityId('vs'),
+          id: 'step-intro-highlights-degli-uffizi',
           type: 'logistics_intro',
           title: 'Benvenuto agli Uffizi',
           description: 'Siete entrati dalla biglietteria principale al piano terra. Salite al primo piano tramite l\'ascensore o la scala monumentale. La visita inizia dalla Sala 10-14, dedicata a Botticelli — seguite i pannelli indicativi.',
@@ -1141,7 +1509,7 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'La Primavera — Botticelli',
-          itemsByRegister: primaveraRegisters,
+          itemIds: primaveraVariants,
           mapCoords: { x: 43.9, y: 23.2, floor: 1 },
           order: 2,
         },
@@ -1156,7 +1524,7 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'La nascita di Venere — Botticelli',
-          itemsByRegister: venereRegisters,
+          itemIds: venereVariants,
           mapCoords: { x: 43.9, y: 23.2, floor: 1 },
           order: 4,
         },
@@ -1171,7 +1539,7 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Annunciazione — Leonardo da Vinci',
-          itemsByRegister: annunciazioneRegisters,
+          itemIds: annunciazioneVariants,
           mapCoords: { x: 70.1, y: 66.2, floor: 1 },
           order: 6,
         },
@@ -1186,7 +1554,7 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Adorazione dei Magi — Leonardo da Vinci',
-          itemsByRegister: adorazioneRegisters,
+          itemIds: adorazioneVariants,
           mapCoords: { x: 70.1, y: 66.2, floor: 1 },
           order: 8,
         },
@@ -1201,7 +1569,7 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Tondo Doni — Michelangelo',
-          itemsByRegister: tondoDoniRegisters,
+          itemIds: tondoDoniVariants,
           mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 10,
         },
@@ -1216,7 +1584,7 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Madonna del Cardellino — Raffaello',
-          itemsByRegister: madonnaRegisters,
+          itemIds: madonnaVariants,
           mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 12,
         },
@@ -1231,7 +1599,7 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Ritratto di Leone X — Raffaello',
-          itemsByRegister: leoneXRegisters,
+          itemIds: leoneXVariants,
           mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 14,
         },
@@ -1246,7 +1614,7 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Flora — Tiziano',
-          itemsByRegister: floraRegisters,
+          itemIds: floraVariants,
           mapCoords: { x: 83.5, y: 82.7, floor: 2 },
           order: 16,
         },
@@ -1261,7 +1629,7 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Venere di Urbino — Tiziano',
-          itemsByRegister: venereUrbinoRegisters,
+          itemIds: venereUrbinoVariants,
           mapCoords: { x: 83.5, y: 82.7, floor: 2 },
           order: 18,
         },
@@ -1276,7 +1644,7 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Medusa — Caravaggio',
-          itemsByRegister: medusaRegisters,
+          itemIds: medusaVariants,
           mapCoords: { x: 73.6, y: 19.2, floor: 2 },
           order: 20,
         },
@@ -1291,7 +1659,7 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Sacrificio di Isacco — Caravaggio',
-          itemsByRegister: sacrificioRegisters,
+          itemIds: sacrificioVariants,
           mapCoords: { x: 73.6, y: 19.2, floor: 2 },
           order: 22,
         },
@@ -1306,9 +1674,16 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Giuditta e Oloferne — Artemisia Gentileschi',
-          itemsByRegister: giudittaRegisters,
+          itemIds: giudittaVariants,
           mapCoords: { x: 73.6, y: 19.2, floor: 2 },
           order: 24,
+        },
+        {
+          id: 'step-outro-highlights-degli-uffizi',
+          type: 'logistics_intro',
+          title: 'Fine della visita',
+          description: 'Il percorso Highlights termina qui. Grazie per aver esplorato gli Uffizi con noi: potete uscire dalla stessa sala d\'ingresso o proseguire liberamente nel museo.',
+          order: 25,
         },
       ],
     },
@@ -1325,7 +1700,7 @@ async function seed() {
       status: 'published',
       steps: [
         {
-          id: generateEntityId('vs'),
+          id: 'step-intro-capolavori-del-rinascimento',
           type: 'logistics_intro',
           title: 'Introduzione al percorso',
           description: 'Questo percorso dura circa 90 minuti e richiede attenzione prolungata. Si consiglia di scaricare la visita prima dell\'ingresso. Si parte dalla Sala 10-14 (Botticelli), primo piano.',
@@ -1342,7 +1717,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'La Primavera — analisi critica',
-          itemsByRegister: primaveraRegisters,
+          itemIds: primaveraVariants,
+          defaultRegister: 'avanzato',
           mapCoords: { x: 43.9, y: 23.2, floor: 1 },
           order: 2,
         },
@@ -1357,7 +1733,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'La nascita di Venere — analisi critica',
-          itemsByRegister: venereRegisters,
+          itemIds: venereVariants,
+          defaultRegister: 'avanzato',
           mapCoords: { x: 43.9, y: 23.2, floor: 1 },
           order: 4,
         },
@@ -1372,7 +1749,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Annunciazione — analisi critica',
-          itemsByRegister: annunciazioneRegisters,
+          itemIds: annunciazioneVariants,
+          defaultRegister: 'avanzato',
           mapCoords: { x: 70.1, y: 66.2, floor: 1 },
           order: 6,
         },
@@ -1387,7 +1765,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Adorazione dei Magi — analisi critica',
-          itemsByRegister: adorazioneRegisters,
+          itemIds: adorazioneVariants,
+          defaultRegister: 'avanzato',
           mapCoords: { x: 70.1, y: 66.2, floor: 1 },
           order: 8,
         },
@@ -1402,7 +1781,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Tondo Doni — analisi critica',
-          itemsByRegister: tondoDoniRegisters,
+          itemIds: tondoDoniVariants,
+          defaultRegister: 'avanzato',
           mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 10,
         },
@@ -1417,7 +1797,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Madonna del Cardellino — analisi critica',
-          itemsByRegister: madonnaRegisters,
+          itemIds: madonnaVariants,
+          defaultRegister: 'avanzato',
           mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 12,
         },
@@ -1432,7 +1813,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Ritratto di Leone X — analisi critica',
-          itemsByRegister: leoneXRegisters,
+          itemIds: leoneXVariants,
+          defaultRegister: 'avanzato',
           mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 14,
         },
@@ -1447,7 +1829,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Flora — analisi critica',
-          itemsByRegister: floraRegisters,
+          itemIds: floraVariants,
+          defaultRegister: 'avanzato',
           mapCoords: { x: 83.5, y: 82.7, floor: 2 },
           order: 16,
         },
@@ -1462,7 +1845,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Venere di Urbino — analisi critica',
-          itemsByRegister: venereUrbinoRegisters,
+          itemIds: venereUrbinoVariants,
+          defaultRegister: 'avanzato',
           mapCoords: { x: 83.5, y: 82.7, floor: 2 },
           order: 18,
         },
@@ -1477,9 +1861,17 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Sacrificio di Isacco — analisi critica',
-          itemsByRegister: sacrificioRegisters,
+          itemIds: sacrificioVariants,
+          defaultRegister: 'avanzato',
           mapCoords: { x: 73.6, y: 19.2, floor: 2 },
           order: 20,
+        },
+        {
+          id: 'step-outro-capolavori-del-rinascimento',
+          type: 'logistics_intro',
+          title: 'Fine della visita',
+          description: 'Il percorso sul Rinascimento termina qui. Grazie per l\'attenzione: potete uscire dalla stessa sala d\'ingresso o proseguire liberamente nel museo.',
+          order: 21,
         },
       ],
     },
@@ -1497,7 +1889,7 @@ async function seed() {
       status: 'published',
       steps: [
         {
-          id: generateEntityId('vs'),
+          id: 'step-intro-uffizi-per-famiglie',
           type: 'logistics_intro',
           title: 'Pronti per l\'avventura!',
           description: 'Benvenuti agli Uffizi! Oggi faremo un viaggio nel tempo tra quadri bellissimi. Seguite i grandi al primo piano e iniziamo dalla Sala di Botticelli — si parte!',
@@ -1514,7 +1906,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'La nascita di Venere',
-          itemsByRegister: venereRegisters,
+          itemIds: venereVariants,
+          defaultRegister: 'elementare',
           mapCoords: { x: 43.9, y: 23.2, floor: 1 },
           order: 2,
         },
@@ -1529,7 +1922,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'La Primavera',
-          itemsByRegister: primaveraRegisters,
+          itemIds: primaveraVariants,
+          defaultRegister: 'elementare',
           mapCoords: { x: 43.9, y: 23.2, floor: 1 },
           order: 4,
         },
@@ -1544,7 +1938,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'L\'Annunciazione di Leonardo',
-          itemsByRegister: annunciazioneRegisters,
+          itemIds: annunciazioneVariants,
+          defaultRegister: 'elementare',
           mapCoords: { x: 70.1, y: 66.2, floor: 1 },
           order: 6,
         },
@@ -1559,7 +1954,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'L\'Adorazione dei Magi',
-          itemsByRegister: adorazioneRegisters,
+          itemIds: adorazioneVariants,
+          defaultRegister: 'elementare',
           mapCoords: { x: 70.1, y: 66.2, floor: 1 },
           order: 8,
         },
@@ -1574,7 +1970,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Il Tondo Doni di Michelangelo',
-          itemsByRegister: tondoDoniRegisters,
+          itemIds: tondoDoniVariants,
+          defaultRegister: 'elementare',
           mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 10,
         },
@@ -1589,7 +1986,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'La Madonna del Cardellino',
-          itemsByRegister: madonnaRegisters,
+          itemIds: madonnaVariants,
+          defaultRegister: 'elementare',
           mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 12,
         },
@@ -1604,7 +2002,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'La Flora di Tiziano',
-          itemsByRegister: floraRegisters,
+          itemIds: floraVariants,
+          defaultRegister: 'elementare',
           mapCoords: { x: 83.5, y: 82.7, floor: 2 },
           order: 14,
         },
@@ -1619,7 +2018,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'La Venere di Urbino',
-          itemsByRegister: venereUrbinoRegisters,
+          itemIds: venereUrbinoVariants,
+          defaultRegister: 'elementare',
           mapCoords: { x: 83.5, y: 82.7, floor: 2 },
           order: 16,
         },
@@ -1634,7 +2034,8 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'La Medusa di Caravaggio',
-          itemsByRegister: medusaRegisters,
+          itemIds: medusaVariants,
+          defaultRegister: 'elementare',
           mapCoords: { x: 73.6, y: 19.2, floor: 2 },
           order: 18,
         },
@@ -1649,9 +2050,17 @@ async function seed() {
           id: generateEntityId('vs'),
           type: 'main_item',
           title: 'Giuditta e Oloferne',
-          itemsByRegister: giudittaRegisters,
+          itemIds: giudittaVariants,
+          defaultRegister: 'elementare',
           mapCoords: { x: 73.6, y: 19.2, floor: 2 },
           order: 20,
+        },
+        {
+          id: 'step-outro-uffizi-per-famiglie',
+          type: 'logistics_intro',
+          title: 'Missione compiuta!',
+          description: 'L\'avventura tra i quadri degli Uffizi finisce qui. Bravissimi esploratori: potete uscire dalla stessa sala d\'ingresso o continuare a curiosare nel museo.',
+          order: 21,
         },
       ],
     },
@@ -1737,9 +2146,11 @@ async function seed() {
   console.log('  Utenti:    5  (admin, autore1, autore2, visitatore1, visitatore2)');
   console.log('  Opere:     12');
   console.log('  Immagini:  ' + seededImages + '/12 riproduzioni PD (Wikimedia Commons) su /uploads');
-  console.log('  Items:     37 (elementare + avanzato per tutte; 5 registri completi per');
-  console.log('             Venere, Primavera, Medusa e Giuditta; 2 candidati "medio" per Venere)');
-  console.log('  Visite:    3  (Highlights 25 step, Rinascimento 21 step, Famiglie 21 step)');
+  console.log('  Items:     56 su due assi (registro × durata)');
+  console.log('             · 8 opere: elementare 1min + avanzato 4min');
+  console.log('             · Venere, Primavera, Medusa, Giuditta: 5 registri, con');
+  console.log('               1/2/4min su elementare e medio e 2/4min su avanzato');
+  console.log('  Visite:    3  (Highlights 26 step, Rinascimento 22 step, Famiglie 22 step)');
   console.log('');
   console.log('  Password di tutti gli utenti: 12345678');
   console.log('  API key di bootstrap: ' + rawApiKey);

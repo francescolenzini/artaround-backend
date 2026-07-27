@@ -6,15 +6,14 @@ const visitStepSchema = new mongoose.Schema(
     type: { type: String, enum: ['logistics_intro', 'main_item', 'optional_item', 'transition'], required: true },
     title: { type: String, required: true },
     description: { type: String },
-    // Una tappa = un'opera: al massimo un ArtworkItem per registro linguistico.
-    // Le chiavi sono fisse (scala dei registri), i valori sono id di ArtworkItem.
-    itemsByRegister: {
-      infantile: { type: String },
-      elementare: { type: String },
-      medio: { type: String },
-      avanzato: { type: String },
-      specialistico: { type: String },
-    },
+    // Una tappa = un'opera, con tutte le sue varianti disponibili in visita.
+    // Registro e durata di ciascuna variante si leggono da
+    // ArtworkItem.classification: qui non si duplicano, così non possono
+    // divergere. Più varianti sullo stesso registro sono legittime, purché
+    // differiscano per durata — sono i due assi che il player naviga con
+    // "troppo semplice" (registro) e "dimmi di più" (durata).
+    itemIds: { type: [String], default: undefined },
+    defaultRegister: { type: String, enum: ['infantile', 'elementare', 'medio', 'avanzato', 'specialistico'] },
     mapCoords: {
       x: { type: Number },
       y: { type: Number },
