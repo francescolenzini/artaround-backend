@@ -2,6 +2,7 @@ const express = require('express');
 
 const Artwork = require('../models/Artwork');
 const ArtworkItem = require('../models/ArtworkItem');
+const User = require('../models/User');
 const { requireApiKeyAndJwt, requireContentEditor } = require('../middleware/auth');
 const { asyncHandler } = require('../middleware/asyncHandler');
 const { canAccessMuseum } = require('../services/tenant');
@@ -11,6 +12,18 @@ const { paginateQuery } = require('../services/pagination');
 const router = express.Router();
 
 router.use(requireApiKeyAndJwt);
+
+async function attachAuthors(items) {
+  const authorIds = [...new Set(items.map((item) => item.creatorId).filter(Boolean))];
+  if (!authorIds.length) return items;
+
+  const users = await User.find({ id: { $in: authorIds } }).select('id fullName username -_id').lean();
+  const byId = new Map(users.map((user) => [user.id, user]));
+  return items.map((item) => ({
+    ...item,
+    author: byId.get(item.creatorId) || { id: item.creatorId, fullName: item.creatorId, username: item.creatorId },
+  }));
+}
 
 router.get(
   '/',
@@ -51,7 +64,14 @@ router.get(
       defaultSortOrder: 'desc',
       searchableFields: ['id', 'artworkId', 'license', 'creatorId', 'lastUpdaterId', 'content.title', 'content.screenText', 'content.ttsText'],
       ignoreFilterFields: isVisitor ? ['museumId', 'status'] : ['museumId'],
+      // L'autore dell'item e' un metadato esclusivamente editoriale: il
+      // Navigator non deve ne' mostrarlo ne' riceverlo nel payload.
+      select: isVisitor ? '-creatorId -lastUpdaterId' : undefined,
     });
+
+    if (!isVisitor) {
+      result.data = await attachAuthors(result.data);
+    }
 
     return res.status(200).json(result);
   })
@@ -68,10 +88,11 @@ router.post(
       return res.status(403).json({ error: { message: 'Forbidden', status: 403 } });
     }
 
+    const { creatorId: _ignoredCreatorId, lastUpdaterId: _ignoredLastUpdaterId, ...itemPayload } = payload;
     const item = await ArtworkItem.create({
-      ...payload,
+      ...itemPayload,
       id: payload.id || generateEntityId('i'),
-      creatorId: payload.creatorId || req.user.id,
+      creatorId: req.user.id,
       lastUpdaterId: req.user.id,
     });
 
@@ -94,7 +115,8 @@ router.put(
       return res.status(403).json({ error: { message: 'Forbidden', status: 403 } });
     }
 
-    Object.assign(item, req.body || {}, { lastUpdaterId: req.user.id });
+    const { creatorId: _ignoredCreatorId, lastUpdaterId: _ignoredLastUpdaterId, ...itemPayload } = req.body || {};
+    Object.assign(item, itemPayload, { lastUpdaterId: req.user.id });
     await item.save();
 
     return res.status(200).json(item);
