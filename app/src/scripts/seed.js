@@ -465,6 +465,26 @@ async function seed() {
     artGiuditta,
   ] = storedArtworks.map((artwork) => artwork.id);
 
+  // La posizione e' una proprieta' dell'opera: le visite la derivano in
+  // lettura e non la duplicano piu' in ogni loro tappa.
+  const artworkLocations = new Map([
+    [artVenere, { label: 'Sala A9', floor: 1, x: 43.9, y: 23.2 }],
+    [artPrimavera, { label: 'Sala A9', floor: 1, x: 43.9, y: 23.2 }],
+    [artAnnunciazione, { label: 'Sala A35', floor: 1, x: 70.1, y: 66.2 }],
+    [artAdorazione, { label: 'Sala A35', floor: 1, x: 70.1, y: 66.2 }],
+    [artTondoDoni, { label: 'Sala A38', floor: 1, x: 56.9, y: 66.2 }],
+    [artMadonna, { label: 'Sala A38', floor: 1, x: 56.9, y: 66.2 }],
+    [artLeoneX, { label: 'Sala A38', floor: 1, x: 56.9, y: 66.2 }],
+    [artVenereUrbino, { label: 'Sala D23', floor: 2, x: 83.5, y: 82.7 }],
+    [artFlora, { label: 'Sala D23', floor: 2, x: 83.5, y: 82.7 }],
+    [artMedusa, { label: 'Sala E4', floor: 2, x: 73.6, y: 19.2 }],
+    [artSacrificio, { label: 'Sala E4', floor: 2, x: 73.6, y: 19.2 }],
+    [artGiuditta, { label: 'Sala E4', floor: 2, x: 73.6, y: 19.2 }],
+  ]);
+  await Promise.all(
+    [...artworkLocations.entries()].map(([id, location]) => Artwork.updateOne({ id }, { $set: { location } }))
+  );
+
   // ── IMMAGINI OPERE ────────────────────────────────────────────────────────
   // Riproduzioni in pubblico dominio scaricate da Wikimedia Commons in
   // seed-assets/ (vedi fetch-seed-images.js). Il binario è upsertato nella
@@ -2071,6 +2091,24 @@ async function seed() {
     Visit.findOne({ slug: 'capolavori-del-rinascimento' }).lean(),
     Visit.findOne({ slug: 'uffizi-per-famiglie' }).lean(),
   ]);
+
+  // I literal storici del seed avevano mapCoords sulla tappa. Le coordinate
+  // sono ora sull'opera; qui completiamo il riferimento diretto artworkId
+  // deducendolo dagli item gia' assegnati alla tappa.
+  const itemArtworkById = new Map(storedItems.map((item) => [item.id, item.artworkId]));
+  await Promise.all(
+    storedVisits.map(async (visit) => {
+      const steps = visit.steps.map((step) => {
+        if (!['main_item', 'optional_item'].includes(step.type)) return step;
+        const artworkIds = [...new Set((step.itemIds || []).map((id) => itemArtworkById.get(id)).filter(Boolean))];
+        if (artworkIds.length !== 1) {
+          throw new Error(`Seed inconsistente: impossibile risolvere l'opera della tappa "${step.title}"`);
+        }
+        return { ...step, artworkId: artworkIds[0] };
+      });
+      await Visit.updateOne({ id: visit.id }, { $set: { steps } });
+    })
+  );
 
   [visHighlights, visRinascimento, visFamiglie] = storedVisits.map((visit) => visit.id);
 

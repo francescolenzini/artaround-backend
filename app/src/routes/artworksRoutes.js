@@ -41,10 +41,10 @@ router.get(
       model: Artwork,
       req,
       baseFilter: filter,
-      allowedSortFields: ['id', 'museumId', 'title', 'artist', 'category', 'style', 'status', 'createdAt', 'updatedAt'],
+      allowedSortFields: ['id', 'museumId', 'title', 'artist', 'category', 'style', 'location.label', 'status', 'createdAt', 'updatedAt'],
       defaultSortBy: 'createdAt',
       defaultSortOrder: 'desc',
-      searchableFields: ['id', 'museumId', 'title', 'artist', 'category', 'style', 'description', 'universalObjectId'],
+      searchableFields: ['id', 'museumId', 'title', 'artist', 'category', 'style', 'location.label', 'description', 'universalObjectId'],
       extraSearchConditions,
     });
 

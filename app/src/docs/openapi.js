@@ -112,6 +112,15 @@ const openapi = {
           year: { type: 'string' },
           category: { type: 'string' },
           style: { type: 'string' },
+          location: {
+            type: 'object',
+            properties: {
+              label: { type: 'string' },
+              floor: { type: 'number' },
+              x: { type: 'number', minimum: 0, maximum: 100 },
+              y: { type: 'number', minimum: 0, maximum: 100 },
+            },
+          },
           dimensions: { type: 'object' },
           assets: { type: 'array', items: { type: 'object' } },
           materials: { type: 'array', items: { type: 'string' } },
@@ -134,6 +143,7 @@ const openapi = {
           status: { type: 'string', enum: ['draft', 'published'] },
           creatorId: { type: 'string' },
           lastUpdaterId: { type: 'string' },
+          author: { type: 'object', description: 'Solo per content editor: autore risolto da creatorId.' },
         },
       },
       Visit: {

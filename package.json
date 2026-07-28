@@ -8,6 +8,7 @@
     "start": "node app/server.js",
     "seed": "node app/src/scripts/seed.js",
     "migrate:visit-items": "node app/src/scripts/migrate-visit-items.js",
+    "migrate:visit-locations": "node app/src/scripts/migrate-visit-locations.js",
     "apikey": "node app/src/scripts/apikey-cli.js",
     "test": "jest --runInBand",
     "test:watch": "jest --watch",

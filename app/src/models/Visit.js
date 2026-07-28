@@ -12,13 +12,9 @@ const visitStepSchema = new mongoose.Schema(
     // divergere. Più varianti sullo stesso registro sono legittime, purché
     // differiscano per durata — sono i due assi che il player naviga con
     // "troppo semplice" (registro) e "dimmi di più" (durata).
+    artworkId: { type: String, index: true },
     itemIds: { type: [String], default: undefined },
     defaultRegister: { type: String, enum: ['infantile', 'elementare', 'medio', 'avanzato', 'specialistico'] },
-    mapCoords: {
-      x: { type: Number },
-      y: { type: Number },
-      floor: { type: Number },
-    },
     order: { type: Number, required: true },
   },
   { _id: false }
