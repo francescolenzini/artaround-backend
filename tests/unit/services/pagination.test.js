@@ -81,6 +81,7 @@ describe('pagination service', () => {
       req,
       defaultSortBy: 'rank',
       defaultSortOrder: 'asc',
+      allowedFilterFields: ['category', 'rank'],
     });
 
     expect(result.pagination.totalItems).toBe(1);

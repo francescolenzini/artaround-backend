@@ -1,6 +1,10 @@
 const dotenv = require('dotenv');
+const path = require('path');
 
-dotenv.config();
+// Il wrapper del cluster esegue `node /webapp/<script>` senza garantire che la
+// directory corrente sia /webapp. Risolviamo quindi il file di configurazione
+// rispetto a questo modulo: backend/src/config -> radice dell'app (/webapp).
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 module.exports = {
   nodeEnv: process.env.NODE_ENV || 'development',

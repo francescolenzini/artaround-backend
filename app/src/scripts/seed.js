@@ -20,7 +20,12 @@ const ApiKey = require('../models/ApiKey');
 const Upload = require('../models/Upload');
 
 const UFFIZI_SLUG = 'galleria-degli-uffizi';
-const BOOTSTRAP_API_KEY = '8e4548cac10363c2c6b3eee94ded29428a4778dbc2005ed6843b998ebf878ec0';
+// In sviluppo il valore fisso rende immediata la prima esecuzione locale. In
+// produzione la chiave deve arrivare dall'ambiente: non va mai pubblicata nel
+// repository insieme ai sorgenti che saranno visibili sul sito di dipartimento.
+const BOOTSTRAP_API_KEY = process.env.BOOTSTRAP_API_KEY || (
+  process.env.NODE_ENV === 'production' ? null : '8e4548cac10363c2c6b3eee94ded29428a4778dbc2005ed6843b998ebf878ec0'
+);
 const REGISTER_ORDER = ['infantile', 'elementare', 'medio', 'avanzato', 'specialistico'];
 
 function seedItemMinutes(item) {
@@ -55,6 +60,10 @@ async function upsertMany(model, docs, filterForDoc) {
 }
 
 async function seed() {
+  if (!BOOTSTRAP_API_KEY) {
+    throw new Error('BOOTSTRAP_API_KEY e obbligatoria quando NODE_ENV=production');
+  }
+
   await connectDb();
 
   // Genera tutti gli ID prima di qualsiasi operazione async,
