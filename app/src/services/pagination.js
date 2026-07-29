@@ -171,19 +171,29 @@ async function paginateQuery({
 
   const filterMap = extractFilterMap(req.query, { allowedFilterFields, ignoreFilterFields });
   const finalFilter = { ...baseFilter };
+  const restrictingFilters = [];
 
   for (const [key, value] of Object.entries(filterMap)) {
     if (value === undefined || value === null || value === '') {
       continue;
     }
 
-    // I vincoli imposti dalla route (tenant, stato pubblicazione, ecc.) sono
-    // sempre autorevoli e non possono essere sostituiti dalla query client.
+    const mongoValue = toMongoFilterValue(value);
+
+    // I vincoli imposti dalla route (tenant, stato pubblicazione, ecc.) restano
+    // autorevoli, ma un filtro client sullo stesso campo deve restringerli.
+    // Ignorarlo farebbe trapelare, per esempio, dati di tutti i musei assegnati
+    // quando il client sta visualizzando un museo preciso.
     if (Object.prototype.hasOwnProperty.call(baseFilter, key)) {
+      restrictingFilters.push({ [key]: mongoValue });
       continue;
     }
 
-    finalFilter[key] = toMongoFilterValue(value);
+    finalFilter[key] = mongoValue;
+  }
+
+  if (restrictingFilters.length) {
+    finalFilter.$and = [...(finalFilter.$and || []), ...restrictingFilters];
   }
 
   const qRaw = req.query.q || req.query.queryString || req.query.search;

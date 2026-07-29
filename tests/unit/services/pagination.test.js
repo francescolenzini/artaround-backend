@@ -89,4 +89,31 @@ describe('pagination service', () => {
     expect(result.filters.category).toBe('north');
     expect(result.filters.rank).toBe('2');
   });
+
+  it('intersects a client filter with a base constraint on the same field', async () => {
+    await PaginationEntity.insertMany([
+      { name: 'North One', category: 'north', rank: 1 },
+      { name: 'North Two', category: 'north', rank: 2 },
+      { name: 'South One', category: 'south', rank: 3 },
+    ]);
+
+    const allowed = await paginateQuery({
+      model: PaginationEntity,
+      req: { query: { category: 'north' } },
+      baseFilter: { category: { $in: ['north', 'south'] } },
+      allowedFilterFields: ['category'],
+    });
+
+    expect(allowed.data.map((item) => item.name).sort()).toEqual(['North One', 'North Two']);
+
+    const forbidden = await paginateQuery({
+      model: PaginationEntity,
+      req: { query: { category: 'west' } },
+      baseFilter: { category: { $in: ['north', 'south'] } },
+      allowedFilterFields: ['category'],
+    });
+
+    expect(forbidden.data).toHaveLength(0);
+    expect(forbidden.pagination.totalItems).toBe(0);
+  });
 });

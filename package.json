@@ -11,6 +11,7 @@
     "migrate:user-status": "node app/src/scripts/migrate-user-status.js",
     "migrate:visit-items": "node app/src/scripts/migrate-visit-items.js",
     "migrate:remove-artwork-locations": "node app/src/scripts/migrate-remove-artwork-locations.js",
+    "cleanup:test-data": "node app/src/scripts/cleanup-test-data.js",
     "apikey": "node app/src/scripts/apikey-cli.js",
     "test": "jest --runInBand",
     "test:watch": "jest --watch",

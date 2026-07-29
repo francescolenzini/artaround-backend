@@ -35,7 +35,7 @@ describe('visits publication gating per ruolo', () => {
       email: 'author@example.com',
       password: 'Password123!',
       role: 'author',
-      assignedMuseumIds: ['mus-a'],
+      assignedMuseumIds: ['mus-a', 'mus-b'],
     });
 
     await Visit.create({
@@ -52,6 +52,15 @@ describe('visits publication gating per ruolo', () => {
       museumId: 'mus-a',
       title: 'Visita in bozza',
       estimatedDurationMinutes: 60,
+      authorId: 'usr-author',
+      status: 'draft',
+      steps: [],
+    });
+    await Visit.create({
+      id: 'vis-other-museum',
+      museumId: 'mus-b',
+      title: 'Visita di un altro museo',
+      estimatedDurationMinutes: 30,
       authorId: 'usr-author',
       status: 'draft',
       steps: [],
@@ -121,5 +130,18 @@ describe('visits publication gating per ruolo', () => {
     const draft = await auth(request(app).get('/visits/vis-draft'));
     expect(draft.status).toBe(200);
     expect(draft.body.id).toBe('vis-draft');
+  });
+
+  it('restringe la lista al museo richiesto per un author assegnato a più musei', async () => {
+    const token = await login('author', 'Password123!');
+    const auth = authed(token);
+
+    const list = await auth(request(app).get('/visits').query({ museumId: 'mus-a' }));
+    expect(list.status).toBe(200);
+    expect(list.body.data.map((visit) => visit.id).sort()).toEqual(['vis-draft', 'vis-published']);
+
+    const outsideScope = await auth(request(app).get('/visits').query({ museumId: 'mus-c' }));
+    expect(outsideScope.status).toBe(200);
+    expect(outsideScope.body.data).toHaveLength(0);
   });
 });

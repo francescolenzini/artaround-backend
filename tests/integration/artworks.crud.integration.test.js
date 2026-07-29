@@ -115,6 +115,32 @@ describe('artworks CRUD + tenant scoping', () => {
     expect(foreign.status).toBe(403);
   });
 
+  it('restringe la lista al museo richiesto per un author assegnato a più musei', async () => {
+    await createUser({
+      id: 'usr-multi-author',
+      username: 'multi-author',
+      email: 'multi-author@example.com',
+      password: 'Password123!',
+      role: 'author',
+      assignedMuseumIds: ['mus-a', 'mus-b'],
+    });
+    await Artwork.create([
+      { id: 'art-a', museumId: 'mus-a', title: 'Opera A' },
+      { id: 'art-b', museumId: 'mus-b', title: 'Opera B' },
+    ]);
+
+    const token = await login('multi-author', 'Password123!');
+    const auth = authed(token);
+
+    const list = await auth(request(app).get('/artworks').query({ museumId: 'mus-a' }));
+    expect(list.status).toBe(200);
+    expect(list.body.data.map((artwork) => artwork.id)).toEqual(['art-a']);
+
+    const outsideScope = await auth(request(app).get('/artworks').query({ museumId: 'mus-c' }));
+    expect(outsideScope.status).toBe(200);
+    expect(outsideScope.body.data).toHaveLength(0);
+  });
+
   it('lets a visitor read but not write content', async () => {
     await createUser({
       id: 'usr-visitor',
