@@ -9,6 +9,13 @@ const { generateEntityId } = require('../services/ids');
 const { paginateQuery, escapeRegex } = require('../services/pagination');
 
 const router = express.Router();
+const ARTWORK_MUTABLE_FIELDS = new Set([
+  'title', 'artist', 'year', 'category', 'style', 'materials', 'dimensions', 'description', 'assets', 'tags', 'status', 'universalObjectId',
+]);
+
+function pickMutableFields(payload) {
+  return Object.fromEntries(Object.entries(payload || {}).filter(([key]) => ARTWORK_MUTABLE_FIELDS.has(key)));
+}
 
 router.use(requireApiKeyAndJwt);
 
@@ -41,10 +48,11 @@ router.get(
       model: Artwork,
       req,
       baseFilter: filter,
-      allowedSortFields: ['id', 'museumId', 'title', 'artist', 'category', 'style', 'location.label', 'status', 'createdAt', 'updatedAt'],
+      allowedSortFields: ['id', 'museumId', 'title', 'artist', 'category', 'style', 'status', 'createdAt', 'updatedAt'],
       defaultSortBy: 'createdAt',
       defaultSortOrder: 'desc',
-      searchableFields: ['id', 'museumId', 'title', 'artist', 'category', 'style', 'location.label', 'description', 'universalObjectId'],
+      searchableFields: ['id', 'museumId', 'title', 'artist', 'category', 'style', 'description', 'universalObjectId'],
+      allowedFilterFields: ['id', 'museumId', 'title', 'artist', 'category', 'style', 'status', 'universalObjectId'],
       extraSearchConditions,
     });
 
@@ -101,7 +109,7 @@ router.put(
       return res.status(403).json({ error: { message: 'Forbidden', status: 403 } });
     }
 
-    Object.assign(artwork, req.body || {});
+    Object.assign(artwork, pickMutableFields(req.body));
     await artwork.save();
 
     return res.status(200).json(artwork);
@@ -122,6 +130,18 @@ router.delete(
       return res.status(403).json({ error: { message: 'Forbidden', status: 403 } });
     }
 
+    const itemCount = await ArtworkItem.countDocuments({ artworkId: artwork.id });
+    if (itemCount) {
+      return res.status(409).json({ error: { message: 'Cannot delete artwork with associated items', status: 409 } });
+    }
+    const Visit = require('../models/Visit');
+    const visitCount = await Visit.countDocuments({
+      museumId: artwork.museumId,
+      steps: { $elemMatch: { artworkId: artwork.id } },
+    });
+    if (visitCount) {
+      return res.status(409).json({ error: { message: 'Cannot delete artwork referenced by visits', status: 409 } });
+    }
     await artwork.deleteOne();
     return res.status(204).send();
   })

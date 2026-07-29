@@ -30,7 +30,6 @@ describe('varianti registro e durata nelle tappe', () => {
       id: 'art-1',
       museumId: 'mus-1',
       title: 'Opera',
-      location: { label: 'Sala 1', floor: 1, x: 20, y: 30 },
     });
     await ArtworkItem.create([
       item('itm-medio-2-a', 'medio', '2min'),
@@ -62,6 +61,7 @@ describe('varianti registro e durata nelle tappe', () => {
     title: 'Tappa',
     artworkId: 'art-1',
     itemIds,
+    defaultItemId: itemIds[0],
     order: 1,
   });
   const payload = (itemIds) => ({
@@ -95,6 +95,29 @@ describe('varianti registro e durata nelle tappe', () => {
       payload(['itm-medio-2-a', 'itm-medio-4', 'itm-avanzato-2'])
     );
     expect(response.status).toBe(201);
+  });
+
+  it('richiede un item iniziale appartenente alla tappa', async () => {
+    const missing = payload(['itm-medio-2-a', 'itm-medio-4']);
+    delete missing.steps[0].defaultItemId;
+    const missingResponse = await auth(request(app).post('/visits')).send(missing);
+    expect(missingResponse.status).toBe(400);
+    expect(missingResponse.body.error.message).toMatch(/defaultItemId included in itemIds/i);
+
+    const outside = payload(['itm-medio-2-a', 'itm-medio-4']);
+    outside.steps[0].defaultItemId = 'itm-avanzato-2';
+    const outsideResponse = await auth(request(app).post('/visits')).send(outside);
+    expect(outsideResponse.status).toBe(400);
+    expect(outsideResponse.body.error.message).toMatch(/defaultItemId included in itemIds/i);
+  });
+
+  it('mantiene coerente il registro legacy con l’item iniziale', async () => {
+    const body = payload(['itm-medio-2-a', 'itm-avanzato-2']);
+    body.steps[0].defaultItemId = 'itm-avanzato-2';
+    body.steps[0].defaultRegister = 'medio';
+    const response = await auth(request(app).post('/visits')).send(body);
+    expect(response.status).toBe(400);
+    expect(response.body.error.message).toMatch(/defaultRegister must match/i);
   });
 });
 

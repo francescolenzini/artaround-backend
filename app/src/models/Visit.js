@@ -14,6 +14,11 @@ const visitStepSchema = new mongoose.Schema(
     // "troppo semplice" (registro) e "dimmi di più" (durata).
     artworkId: { type: String, index: true },
     itemIds: { type: [String], default: undefined },
+    // Variante editoriale da proporre al primo ingresso nella tappa. Il campo
+    // resta opzionale nello schema per poter leggere i documenti storici; le
+    // nuove scritture vengono validate dalle route.
+    defaultItemId: { type: String },
+    // Compatibilità con le visite create prima di defaultItemId.
     defaultRegister: { type: String, enum: ['infantile', 'elementare', 'medio', 'avanzato', 'specialistico'] },
     order: { type: Number, required: true },
   },

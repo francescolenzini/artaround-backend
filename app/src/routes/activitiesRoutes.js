@@ -28,6 +28,7 @@ router.get(
       defaultSortBy: 'timestamp',
       defaultSortOrder: 'desc',
       searchableFields: ['id', 'userId', 'action', 'entityType', 'entityId', 'entityName', 'museumId', 'details'],
+      allowedFilterFields: ['id', 'userId', 'action', 'entityType', 'entityId', 'museumId'],
     });
 
     return res.status(200).json(result);
@@ -44,11 +45,12 @@ router.post(
       return res.status(403).json({ error: { message: 'Forbidden', status: 403 } });
     }
 
+    const { id: _ignoredId, userId: _ignoredUserId, timestamp: _ignoredTimestamp, ...activityPayload } = payload;
     const activity = await Activity.create({
-      ...payload,
-      id: payload.id || generateEntityId('act'),
-      userId: payload.userId || req.user.id,
-      timestamp: payload.timestamp || new Date(),
+      ...activityPayload,
+      id: generateEntityId('act'),
+      userId: req.user.id,
+      timestamp: new Date(),
     });
 
     return res.status(201).json(activity);

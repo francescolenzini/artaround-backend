@@ -21,6 +21,7 @@ router.get(
       defaultSortBy: 'requestCreatedAt',
       defaultSortOrder: 'desc',
       searchableFields: ['method', 'path', 'userId', 'username', 'apiKeyPrefix', 'correlationId'],
+      allowedFilterFields: ['method', 'path', 'statusCode', 'userId', 'username', 'apiKeyPrefix', 'correlationId'],
     });
 
     return res.status(200).json(result);

@@ -32,6 +32,7 @@ async function resolveUserFromBearerHeader(authHeader) {
 }
 
 async function requireApiKey(req, res, next) {
+  try {
   const value = req.header('x-api-key');
   if (!value) {
     return res.status(401).json({ error: { message: 'Missing API key', status: 401 } });
@@ -50,10 +51,14 @@ async function requireApiKey(req, res, next) {
   };
 
   await ApiKey.updateOne({ _id: apiKey._id }, { $set: { lastUsedAt: new Date() } });
-  return next();
+    return next();
+  } catch (error) {
+    return next(error);
+  }
 }
 
 async function requireJwt(req, res, next) {
+  try {
   const authHeader = req.header('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: { message: 'Missing Bearer token', status: 401 } });
@@ -75,10 +80,14 @@ async function requireJwt(req, res, next) {
     assignedMuseumIds: user.assignedMuseumIds || [],
   };
 
-  return next();
+    return next();
+  } catch (error) {
+    return next(error);
+  }
 }
 
 async function requireApiKeyAndJwt(req, res, next) {
+  try {
   const apiKeyValue = req.header('x-api-key');
   if (!apiKeyValue) {
     return res.status(401).json({ error: { message: 'Missing API key', status: 401 } });
@@ -118,7 +127,10 @@ async function requireApiKeyAndJwt(req, res, next) {
     assignedMuseumIds: user.assignedMuseumIds || [],
   };
 
-  return next();
+    return next();
+  } catch (error) {
+    return next(error);
+  }
 }
 
 function requireRole(...roles) {

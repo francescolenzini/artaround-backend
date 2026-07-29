@@ -10,6 +10,11 @@ const { generateEntityId } = require('../services/ids');
 const { paginateQuery } = require('../services/pagination');
 
 const router = express.Router();
+const ITEM_MUTABLE_FIELDS = new Set(['classification', 'content', 'images', 'license', 'isFree', 'price', 'status']);
+
+function pickMutableFields(payload) {
+  return Object.fromEntries(Object.entries(payload || {}).filter(([key]) => ITEM_MUTABLE_FIELDS.has(key)));
+}
 
 router.use(requireApiKeyAndJwt);
 
@@ -64,6 +69,7 @@ router.get(
       defaultSortOrder: 'desc',
       searchableFields: ['id', 'artworkId', 'license', 'creatorId', 'lastUpdaterId', 'content.title', 'content.screenText', 'content.ttsText'],
       ignoreFilterFields: isVisitor ? ['museumId', 'status'] : ['museumId'],
+      allowedFilterFields: ['id', 'artworkId', 'status', 'isFree', 'creatorId', 'lastUpdaterId'],
       // L'autore dell'item e' un metadato esclusivamente editoriale: il
       // Navigator non deve ne' mostrarlo ne' riceverlo nel payload.
       select: isVisitor ? '-creatorId -lastUpdaterId' : undefined,
@@ -115,8 +121,7 @@ router.put(
       return res.status(403).json({ error: { message: 'Forbidden', status: 403 } });
     }
 
-    const { creatorId: _ignoredCreatorId, lastUpdaterId: _ignoredLastUpdaterId, ...itemPayload } = req.body || {};
-    Object.assign(item, itemPayload, { lastUpdaterId: req.user.id });
+    Object.assign(item, pickMutableFields(req.body), { lastUpdaterId: req.user.id });
     await item.save();
 
     return res.status(200).json(item);
@@ -138,6 +143,13 @@ router.delete(
       return res.status(403).json({ error: { message: 'Forbidden', status: 403 } });
     }
 
+    const Visit = require('../models/Visit');
+    const visitCount = await Visit.countDocuments({
+      steps: { $elemMatch: { itemIds: item.id } },
+    });
+    if (visitCount) {
+      return res.status(409).json({ error: { message: 'Cannot delete artwork item referenced by visits', status: 409 } });
+    }
     await item.deleteOne();
     return res.status(204).send();
   })

@@ -57,13 +57,27 @@ function safeParseFilters(rawFilters) {
   return {};
 }
 
-function extractFilterMap(query, ignoreFilterFields = []) {
+function isScalarOrScalarArray(value) {
+  return (
+    ['string', 'number', 'boolean'].includes(typeof value) ||
+    (Array.isArray(value) && value.every((item) => ['string', 'number', 'boolean'].includes(typeof item)))
+  );
+}
+
+function extractFilterMap(query, { allowedFilterFields = [], ignoreFilterFields = [] } = {}) {
   const parsedFromJson = safeParseFilters(query.filters);
   const ignored = new Set(ignoreFilterFields);
-  const filterMap = { ...parsedFromJson };
+  const allowed = new Set(allowedFilterFields);
+  const filterMap = {};
+
+  for (const [key, value] of Object.entries(parsedFromJson)) {
+    if (allowed.has(key) && !ignored.has(key) && isScalarOrScalarArray(value)) {
+      filterMap[key] = value;
+    }
+  }
 
   for (const [key, value] of Object.entries(query)) {
-    if (RESERVED_QUERY_KEYS.has(key) || ignored.has(key)) {
+    if (RESERVED_QUERY_KEYS.has(key) || ignored.has(key) || !allowed.has(key) || !isScalarOrScalarArray(value)) {
       continue;
     }
 
@@ -147,6 +161,7 @@ async function paginateQuery({
   searchableFields = [],
   extraSearchConditions = [],
   ignoreFilterFields = [],
+  allowedFilterFields = [],
   select,
   lean = true,
 }) {
@@ -154,11 +169,17 @@ async function paginateQuery({
   const requestedSize = toPositiveInt(req.query.pageSize, defaultPageSize);
   const pageSize = Math.min(requestedSize, maxPageSize);
 
-  const filterMap = extractFilterMap(req.query, ignoreFilterFields);
+  const filterMap = extractFilterMap(req.query, { allowedFilterFields, ignoreFilterFields });
   const finalFilter = { ...baseFilter };
 
   for (const [key, value] of Object.entries(filterMap)) {
     if (value === undefined || value === null || value === '') {
+      continue;
+    }
+
+    // I vincoli imposti dalla route (tenant, stato pubblicazione, ecc.) sono
+    // sempre autorevoli e non possono essere sostituiti dalla query client.
+    if (Object.prototype.hasOwnProperty.call(baseFilter, key)) {
       continue;
     }
 
@@ -168,12 +189,17 @@ async function paginateQuery({
   const qRaw = req.query.q || req.query.queryString || req.query.search;
   const q = typeof qRaw === 'string' ? qRaw.trim() : '';
   if (q && (searchableFields.length > 0 || extraSearchConditions.length > 0)) {
-    finalFilter.$or = [
+    const searchFilter = {
+      $or: [
       ...searchableFields.map((field) => ({
         [field]: { $regex: escapeRegex(q), $options: 'i' },
       })),
       ...extraSearchConditions,
-    ];
+      ],
+    };
+    // Non sovrascrivere un eventuale $or del baseFilter (ad esempio lo scope
+    // delle activity): la ricerca deve restringere, non allargare, il risultato.
+    finalFilter.$and = [...(finalFilter.$and || []), searchFilter];
   }
 
   const sort = buildSort({

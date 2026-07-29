@@ -9,6 +9,17 @@ const openingHourSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const logisticsSchema = new mongoose.Schema(
+  {
+    exit: { type: String, required: true, trim: true },
+    toilet: { type: String, trim: true },
+    bar: { type: String, trim: true },
+    shop: { type: String, trim: true },
+    obstacles: { type: String, trim: true },
+  },
+  { _id: false }
+);
+
 const museumSchema = new mongoose.Schema(
   {
     id: { type: String, required: true, unique: true, index: true },
@@ -30,9 +41,14 @@ const museumSchema = new mongoose.Schema(
     ticketInfo: { type: String },
     accessibilityNotes: { type: String },
     services: { type: [String], required: true, default: [] },
+    logistics: { type: logisticsSchema, required: true },
     internalNotes: { type: String },
-    defaultLanguage: { type: String, required: true },
-    supportedLanguages: { type: [String], required: true, default: [] },
+    defaultLanguage: { type: String, required: true, trim: true, lowercase: true },
+    supportedLanguages: {
+      type: [{ type: String, trim: true, lowercase: true }],
+      required: true,
+      default: [],
+    },
     assignedCuratorIds: { type: [String], required: true, default: [] },
   },
   {

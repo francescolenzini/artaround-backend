@@ -52,9 +52,8 @@ const openapi = {
           fullName: { type: 'string' },
           email: { type: 'string' },
           username: { type: 'string' },
-          avatar: { type: 'string' },
           role: { type: 'string', enum: ['super_admin', 'author', 'visitor'] },
-          status: { type: 'string', enum: ['active', 'invited', 'suspended', 'archived'] },
+          status: { type: 'string', enum: ['active', 'suspended', 'archived'] },
           assignedMuseumIds: { type: 'array', items: { type: 'string' } },
           lastLogin: { type: 'string', format: 'date-time' },
           notes: { type: 'string' },
@@ -92,6 +91,17 @@ const openapi = {
           ticketInfo: { type: 'string' },
           accessibilityNotes: { type: 'string' },
           services: { type: 'array', items: { type: 'string' } },
+          logistics: {
+            type: 'object',
+            required: ['exit'],
+            properties: {
+              exit: { type: 'string', minLength: 1 },
+              toilet: { type: 'string' },
+              bar: { type: 'string' },
+              shop: { type: 'string' },
+              obstacles: { type: 'string' },
+            },
+          },
           internalNotes: { type: 'string' },
           defaultLanguage: { type: 'string' },
           supportedLanguages: { type: 'array', items: { type: 'string' } },
@@ -112,15 +122,6 @@ const openapi = {
           year: { type: 'string' },
           category: { type: 'string' },
           style: { type: 'string' },
-          location: {
-            type: 'object',
-            properties: {
-              label: { type: 'string' },
-              floor: { type: 'number' },
-              x: { type: 'number', minimum: 0, maximum: 100 },
-              y: { type: 'number', minimum: 0, maximum: 100 },
-            },
-          },
           dimensions: { type: 'object' },
           assets: { type: 'array', items: { type: 'object' } },
           materials: { type: 'array', items: { type: 'string' } },
@@ -347,7 +348,7 @@ const openapi = {
       post: { tags: ['Users'], summary: 'Create user (super_admin)', security: [{ ApiKeyAuth: [] }, { BearerAuth: [] }], requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/User' } } } }, responses: { '201': { description: 'User created' } } },
     },
     '/users/{id}': {
-      patch: { tags: ['Users'], summary: 'Update user or own profile', security: [{ ApiKeyAuth: [] }, { BearerAuth: [] }], parameters: [{ $ref: '#/components/parameters/IdParam' }], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object' } } } }, responses: { '200': { description: 'User updated' } } },
+      patch: { tags: ['Users'], summary: 'Update user or own profile', security: [{ ApiKeyAuth: [] }, { BearerAuth: [] }], parameters: [{ $ref: '#/components/parameters/IdParam' }], requestBody: { required: true, content: { 'application/json': { schema: { type: 'object' } } } }, responses: { '200': { description: 'User updated' }, '400': { description: 'Invalid patch' }, '409': { description: 'Username already exists' } } },
     },
     '/api-keys': {
       get: { tags: ['API Keys'], summary: 'List API keys (super_admin)', security: [{ ApiKeyAuth: [] }, { BearerAuth: [] }], parameters: [{ $ref: '#/components/parameters/PageParam' }, { $ref: '#/components/parameters/PageSizeParam' }, { $ref: '#/components/parameters/SortByParam' }, { $ref: '#/components/parameters/SortOrderParam' }, { $ref: '#/components/parameters/SearchQueryParam' }, { $ref: '#/components/parameters/QueryStringParam' }, { $ref: '#/components/parameters/FiltersParam' }], responses: { '200': { description: 'API keys paginated list' } } },

@@ -48,13 +48,11 @@ describe('seed idempotence', () => {
     await runSeed();
 
     const ArtworkItem = mongoose.model('ArtworkItem');
-    const Artwork = mongoose.model('Artwork');
     const Visit = mongoose.model('Visit');
     const items = await ArtworkItem.find({}).lean();
     const itemsById = new Map(items.map((item) => [item.id, item]));
 
     const visits = await Visit.find({}).lean();
-    const artworksById = new Map((await Artwork.find({}).lean()).map((artwork) => [artwork.id, artwork]));
     expect(visits).toHaveLength(3);
 
     for (const visit of visits) {
@@ -68,9 +66,6 @@ describe('seed idempotence', () => {
           expect(itemIds.length).toBeGreaterThan(0);
           expect(step.artworkId).toBeDefined();
           expect(step.mapCoords).toBeUndefined();
-          expect(artworksById.get(step.artworkId)?.location).toEqual(
-            expect.objectContaining({ label: expect.any(String), floor: expect.any(Number), x: expect.any(Number), y: expect.any(Number) })
-          );
         } else {
           expect(itemIds).toHaveLength(0);
         }

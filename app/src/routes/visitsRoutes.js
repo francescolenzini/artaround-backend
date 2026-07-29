@@ -14,6 +14,13 @@ const router = express.Router();
 router.use(requireApiKeyAndJwt);
 
 const ITEM_STEP_TYPES = new Set(['main_item', 'optional_item']);
+const VISIT_MUTABLE_FIELDS = new Set([
+  'title', 'slug', 'subtitle', 'description', 'targetAudience', 'coverImage', 'estimatedDurationMinutes', 'status', 'steps',
+]);
+
+function pickMutableFields(payload) {
+  return Object.fromEntries(Object.entries(payload || {}).filter(([key]) => VISIT_MUTABLE_FIELDS.has(key)));
+}
 
 function isItemStep(step) {
   return ITEM_STEP_TYPES.has(step.type);
@@ -28,7 +35,7 @@ function badRequest(message) {
 async function validateSteps(steps, museumId) {
   if (!Array.isArray(steps)) throw badRequest('steps must be an array');
   if (steps.some((step) => Object.prototype.hasOwnProperty.call(step, 'mapCoords'))) {
-    throw badRequest('mapCoords is deprecated: set the artwork location instead');
+    throw badRequest('mapCoords is not supported: configure artworkLocations in the Navigator');
   }
 
   for (const step of steps) {
@@ -46,16 +53,26 @@ async function validateSteps(steps, museumId) {
     if (new Set(itemIds).size !== itemIds.length) {
       throw badRequest('Artwork steps cannot contain duplicate itemIds');
     }
+    if (!step.defaultItemId || !itemIds.includes(step.defaultItemId)) {
+      throw badRequest('Artwork steps require a defaultItemId included in itemIds');
+    }
 
-    const artwork = await Artwork.findOne({ id: step.artworkId, museumId }).select('id location').lean();
+    const artwork = await Artwork.findOne({ id: step.artworkId, museumId }).select('id').lean();
     if (!artwork) throw badRequest('Artwork step references an artwork outside this museum');
-    if (!artwork.location) throw badRequest('Artwork steps require an artwork with a complete location');
 
     const items = await ArtworkItem.find({ id: { $in: itemIds }, artworkId: artwork.id })
       .select('id classification.languageRegister classification.fruitionLength')
       .lean();
     if (items.length !== itemIds.length) {
       throw badRequest('Every itemId in an artwork step must belong to its artwork');
+    }
+
+    const defaultItem = items.find((item) => item.id === step.defaultItemId);
+    if (
+      step.defaultRegister &&
+      defaultItem?.classification?.languageRegister !== step.defaultRegister
+    ) {
+      throw badRequest('defaultRegister must match the language register of defaultItemId');
     }
 
     const occupiedVariants = new Set();
@@ -72,17 +89,20 @@ async function validateSteps(steps, museumId) {
   }
 }
 
-async function withMapLocations(visit) {
+async function withArtworkMapKeys(visit) {
   const plain = visit.toObject ? visit.toObject() : visit;
   const artworkIds = [...new Set(plain.steps.filter(isItemStep).map((step) => step.artworkId).filter(Boolean))];
   if (!artworkIds.length) return plain;
 
-  const artworks = await Artwork.find({ id: { $in: artworkIds } }).select('id location').lean();
-  const locations = new Map(artworks.map((artwork) => [artwork.id, artwork.location]));
+  // La mappa è configurazione statica del Navigator. Il backend espone solo
+  // una chiave stabile per collegare l'opera al file di configurazione, senza
+  // conoscere sala, piano o coordinate.
+  const artworks = await Artwork.find({ id: { $in: artworkIds } }).select('id universalObjectId').lean();
+  const keys = new Map(artworks.map((artwork) => [artwork.id, artwork.universalObjectId || artwork.id]));
   return {
     ...plain,
     steps: plain.steps.map((step) =>
-      isItemStep(step) && locations.has(step.artworkId) ? { ...step, mapLocation: locations.get(step.artworkId) } : step
+      isItemStep(step) && keys.has(step.artworkId) ? { ...step, artworkMapKey: keys.get(step.artworkId) } : step
     ),
   };
 }
@@ -110,6 +130,7 @@ router.get(
       defaultSortBy: 'createdAt',
       defaultSortOrder: 'desc',
       searchableFields: ['id', 'museumId', 'title', 'subtitle', 'description', 'targetAudience', 'authorId'],
+      allowedFilterFields: ['id', 'museumId', 'title', 'status', 'authorId'],
     });
 
     return res.status(200).json(result);
@@ -135,7 +156,7 @@ router.get(
       return res.status(404).json({ error: { message: 'Visit not found', status: 404 } });
     }
 
-    return res.status(200).json(await withMapLocations(visit));
+    return res.status(200).json(await withArtworkMapKeys(visit));
   })
 );
 
@@ -175,11 +196,12 @@ router.put(
       return res.status(403).json({ error: { message: 'Forbidden', status: 403 } });
     }
 
-    if (Object.prototype.hasOwnProperty.call(req.body || {}, 'steps')) {
-      await validateSteps(req.body.steps, visit.museumId);
+    const patch = pickMutableFields(req.body);
+    if (Object.prototype.hasOwnProperty.call(patch, 'steps')) {
+      await validateSteps(patch.steps, visit.museumId);
     }
 
-    Object.assign(visit, req.body || {});
+    Object.assign(visit, patch);
     await visit.save();
 
     return res.status(200).json(visit);

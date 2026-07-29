@@ -241,6 +241,8 @@ esclusivamente dai file `docker-compose` — non esiste un `.env.example` app-le
 | `npm run dev` | avvio con nodemon (`app/server.js`), usato da `docker/Dockerfile` |
 | `npm start` | avvio produzione (`node app/server.js`), usato da `docker/Dockerfile.prod` |
 | `npm run seed` | popola il DB e stampa la API key di bootstrap |
+| `npm run migrate:user-status -- --dry-run` | conta gli account legacy con stato `invited`, senza modificare dati |
+| `npm run migrate:user-status` | migrazione one-shot e idempotente: converte gli account legacy `invited` in `active`; eseguirla manualmente solo se il database esisteva prima della rimozione dello stato |
 | `npm run apikey` | CLI gestione API key (`app/src/scripts/apikey-cli.js`) |
 | `npm test` / `test:unit` / `test:integration` / `test:ci` | suite Jest — vedi nota sull'immagine glibc sopra |
 

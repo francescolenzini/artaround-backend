@@ -7,7 +7,7 @@ const { createApiKey, createUser } = require('../testUtils/authHelpers');
 const Artwork = require('../../app/src/models/Artwork');
 const ArtworkItem = require('../../app/src/models/ArtworkItem');
 
-describe('posizioni opera nelle visite', () => {
+describe('tappe-opera nelle visite', () => {
   let app;
   let apiKey;
   let token;
@@ -17,7 +17,7 @@ describe('posizioni opera nelle visite', () => {
   });
 
   beforeEach(async () => {
-    apiKey = await createApiKey({ name: 'Visit locations key' });
+    apiKey = await createApiKey({ name: 'Visit steps key' });
     const { password } = await createUser({
       id: 'usr-author',
       username: 'author',
@@ -29,8 +29,8 @@ describe('posizioni opera nelle visite', () => {
     await Artwork.create({
       id: 'art-1',
       museumId: 'mus-1',
-      title: 'Opera in sala',
-      location: { label: 'Sala A9', floor: 1, x: 40, y: 20 },
+      title: 'Opera',
+      universalObjectId: 'UO-TEST-001',
     });
     await ArtworkItem.create({
       id: 'itm-1',
@@ -64,34 +64,35 @@ describe('posizioni opera nelle visite', () => {
     steps: [step],
   });
 
-  it('deriva mapLocation dall’opera, senza persisterla nella tappa', async () => {
+  it('restituisce una chiave stabile per la configurazione, senza coordinate della mappa', async () => {
     const created = await auth(request(app).post('/visits')).send(
-      visitPayload({ id: 'step-1', type: 'main_item', title: 'Tappa', artworkId: 'art-1', itemIds: ['itm-1'], order: 1 })
+      visitPayload({ id: 'step-1', type: 'main_item', title: 'Tappa', artworkId: 'art-1', itemIds: ['itm-1'], defaultItemId: 'itm-1', order: 1 })
     );
     expect(created.status).toBe(201);
 
     const read = await auth(request(app).get(`/visits/${created.body.id}`));
     expect(read.status).toBe(200);
     expect(read.body.steps[0]).toEqual(
-      expect.objectContaining({ artworkId: 'art-1', mapLocation: { label: 'Sala A9', floor: 1, x: 40, y: 20 } })
+      expect.objectContaining({ artworkId: 'art-1', artworkMapKey: 'UO-TEST-001' })
     );
+    expect(read.body.steps[0].mapLocation).toBeUndefined();
     expect(read.body.steps[0].mapCoords).toBeUndefined();
   });
 
-  it('rifiuta coordinate duplicate o item di un’altra opera nella tappa', async () => {
+  it('rifiuta coordinate legacy o item di un’altra opera nella tappa', async () => {
     const legacy = await auth(request(app).post('/visits')).send(
       visitPayload({
-        id: 'step-1', type: 'main_item', title: 'Tappa', artworkId: 'art-1', itemIds: ['itm-1'], mapCoords: { floor: 1, x: 40, y: 20 }, order: 1,
+        id: 'step-1', type: 'main_item', title: 'Tappa', artworkId: 'art-1', itemIds: ['itm-1'], defaultItemId: 'itm-1', mapCoords: { floor: 1, x: 40, y: 20 }, order: 1,
       })
     );
     expect(legacy.status).toBe(400);
 
-    await Artwork.create({ id: 'art-2', museumId: 'mus-1', title: 'Altra opera', location: { label: 'Sala A10', floor: 1, x: 50, y: 20 } });
+    await Artwork.create({ id: 'art-2', museumId: 'mus-1', title: 'Altra opera' });
     await ArtworkItem.create({
       id: 'itm-2', artworkId: 'art-2', classification: { languageRegister: 'medio', fruitionLength: '2min' }, content: { title: 'Altro' }, creatorId: 'usr-author', lastUpdaterId: 'usr-author',
     });
     const inconsistent = await auth(request(app).post('/visits')).send(
-      visitPayload({ id: 'step-1', type: 'main_item', title: 'Tappa', artworkId: 'art-1', itemIds: ['itm-2'], order: 1 })
+      visitPayload({ id: 'step-1', type: 'main_item', title: 'Tappa', artworkId: 'art-1', itemIds: ['itm-2'], defaultItemId: 'itm-2', order: 1 })
     );
     expect(inconsistent.status).toBe(400);
   });

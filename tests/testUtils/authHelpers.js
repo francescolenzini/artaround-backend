@@ -26,6 +26,7 @@ async function createUser({
   role = 'super_admin',
   status = 'active',
   assignedMuseumIds = [],
+  notes,
 } = {}) {
   const passwordHash = await bcrypt.hash(password, 10);
 
@@ -38,6 +39,7 @@ async function createUser({
     role,
     status,
     assignedMuseumIds,
+    notes,
   });
 
   return { user, password };

@@ -22,6 +22,7 @@ router.get(
       defaultSortBy: 'createdAt',
       defaultSortOrder: 'desc',
       searchableFields: ['name', 'prefix', 'status', 'createdByUserId', 'disabledByUserId'],
+      allowedFilterFields: ['name', 'prefix', 'status', 'createdByUserId', 'disabledByUserId'],
       select: '-keyHash',
     });
 

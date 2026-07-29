@@ -21,6 +21,29 @@ const Upload = require('../models/Upload');
 
 const UFFIZI_SLUG = 'galleria-degli-uffizi';
 const BOOTSTRAP_API_KEY = '8e4548cac10363c2c6b3eee94ded29428a4778dbc2005ed6843b998ebf878ec0';
+const REGISTER_ORDER = ['infantile', 'elementare', 'medio', 'avanzato', 'specialistico'];
+
+function seedItemMinutes(item) {
+  const match = String(item?.classification?.fruitionLength || '').match(/^(\d+(?:\.\d+)?)(s|min)$/);
+  if (!match) return Number.POSITIVE_INFINITY;
+  const value = Number(match[1]);
+  return match[2] === 's' ? value / 60 : value;
+}
+
+function seedDefaultItem(step, itemById) {
+  const variants = (step.itemIds || []).map((id) => itemById.get(id)).filter(Boolean);
+  if (!variants.length) return null;
+
+  const targetRegister = step.defaultRegister || 'medio';
+  const targetIndex = REGISTER_ORDER.indexOf(targetRegister);
+  return [...variants].sort((a, b) => {
+    const registerA = REGISTER_ORDER.indexOf(a.classification?.languageRegister);
+    const registerB = REGISTER_ORDER.indexOf(b.classification?.languageRegister);
+    const distanceA = Math.abs(registerA - targetIndex);
+    const distanceB = Math.abs(registerB - targetIndex);
+    return distanceA - distanceB || registerA - registerB || seedItemMinutes(a) - seedItemMinutes(b);
+  })[0];
+}
 
 async function upsertMany(model, docs, filterForDoc) {
   return Promise.all(
@@ -171,6 +194,13 @@ async function seed() {
       ticketInfo: 'Intero €20, ridotto €10. Prenotazione consigliata online su uffizi.it.',
       accessibilityNotes: 'Il museo è accessibile alle persone con disabilità motoria. Disponibili ascensori e percorsi facilitati per tutte le sale principali.',
       services: ['audioguida', 'bookshop', 'caffetteria', 'guardaroba', 'visite guidate', 'wi-fi'],
+      logistics: {
+        exit: 'L’uscita principale è al piano terra, verso Piazzale degli Uffizi.',
+        toilet: 'Le toilette si trovano al piano terra e al primo piano e sono indicate dalla segnaletica.',
+        bar: 'La caffetteria è al secondo piano, sulla terrazza sopra la Loggia dei Lanzi.',
+        shop: 'Il bookshop si trova al piano terra, lungo il percorso di uscita.',
+        obstacles: 'Sono disponibili ascensori e percorsi accessibili; per assistenza rivolgersi al personale.',
+      },
       internalNotes: 'Museo campione per il progetto ArtAround — dati di demo.',
       assignedCuratorIds: [usrAutore1, usrAutore2],
     },
@@ -186,6 +216,11 @@ async function seed() {
       postalCode: '40100',
       country: 'Italy',
       defaultLanguage: 'it',
+      supportedLanguages: ['it'],
+      logistics: {
+        exit: 'L’uscita si trova al piano terra, accanto all’ingresso principale.',
+        obstacles: 'Per informazioni sull’accessibilità rivolgersi al personale.',
+      },
       assignedCuratorIds: [],
     },
   ], (doc) => ({ slug: doc.slug }));
@@ -464,26 +499,6 @@ async function seed() {
     artSacrificio,
     artGiuditta,
   ] = storedArtworks.map((artwork) => artwork.id);
-
-  // La posizione e' una proprieta' dell'opera: le visite la derivano in
-  // lettura e non la duplicano piu' in ogni loro tappa.
-  const artworkLocations = new Map([
-    [artVenere, { label: 'Sala A9', floor: 1, x: 43.9, y: 23.2 }],
-    [artPrimavera, { label: 'Sala A9', floor: 1, x: 43.9, y: 23.2 }],
-    [artAnnunciazione, { label: 'Sala A35', floor: 1, x: 70.1, y: 66.2 }],
-    [artAdorazione, { label: 'Sala A35', floor: 1, x: 70.1, y: 66.2 }],
-    [artTondoDoni, { label: 'Sala A38', floor: 1, x: 56.9, y: 66.2 }],
-    [artMadonna, { label: 'Sala A38', floor: 1, x: 56.9, y: 66.2 }],
-    [artLeoneX, { label: 'Sala A38', floor: 1, x: 56.9, y: 66.2 }],
-    [artVenereUrbino, { label: 'Sala D23', floor: 2, x: 83.5, y: 82.7 }],
-    [artFlora, { label: 'Sala D23', floor: 2, x: 83.5, y: 82.7 }],
-    [artMedusa, { label: 'Sala E4', floor: 2, x: 73.6, y: 19.2 }],
-    [artSacrificio, { label: 'Sala E4', floor: 2, x: 73.6, y: 19.2 }],
-    [artGiuditta, { label: 'Sala E4', floor: 2, x: 73.6, y: 19.2 }],
-  ]);
-  await Promise.all(
-    [...artworkLocations.entries()].map(([id, location]) => Artwork.updateOne({ id }, { $set: { location } }))
-  );
 
   // ── IMMAGINI OPERE ────────────────────────────────────────────────────────
   // Riproduzioni in pubblico dominio scaricate da Wikimedia Commons in
@@ -1530,7 +1545,6 @@ async function seed() {
           type: 'main_item',
           title: 'La Primavera — Botticelli',
           itemIds: primaveraVariants,
-          mapCoords: { x: 43.9, y: 23.2, floor: 1 },
           order: 2,
         },
         {
@@ -1545,7 +1559,6 @@ async function seed() {
           type: 'main_item',
           title: 'La nascita di Venere — Botticelli',
           itemIds: venereVariants,
-          mapCoords: { x: 43.9, y: 23.2, floor: 1 },
           order: 4,
         },
         {
@@ -1560,7 +1573,6 @@ async function seed() {
           type: 'main_item',
           title: 'Annunciazione — Leonardo da Vinci',
           itemIds: annunciazioneVariants,
-          mapCoords: { x: 70.1, y: 66.2, floor: 1 },
           order: 6,
         },
         {
@@ -1575,7 +1587,6 @@ async function seed() {
           type: 'main_item',
           title: 'Adorazione dei Magi — Leonardo da Vinci',
           itemIds: adorazioneVariants,
-          mapCoords: { x: 70.1, y: 66.2, floor: 1 },
           order: 8,
         },
         {
@@ -1590,7 +1601,6 @@ async function seed() {
           type: 'main_item',
           title: 'Tondo Doni — Michelangelo',
           itemIds: tondoDoniVariants,
-          mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 10,
         },
         {
@@ -1605,7 +1615,6 @@ async function seed() {
           type: 'main_item',
           title: 'Madonna del Cardellino — Raffaello',
           itemIds: madonnaVariants,
-          mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 12,
         },
         {
@@ -1620,7 +1629,6 @@ async function seed() {
           type: 'main_item',
           title: 'Ritratto di Leone X — Raffaello',
           itemIds: leoneXVariants,
-          mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 14,
         },
         {
@@ -1635,7 +1643,6 @@ async function seed() {
           type: 'main_item',
           title: 'Flora — Tiziano',
           itemIds: floraVariants,
-          mapCoords: { x: 83.5, y: 82.7, floor: 2 },
           order: 16,
         },
         {
@@ -1650,7 +1657,6 @@ async function seed() {
           type: 'main_item',
           title: 'Venere di Urbino — Tiziano',
           itemIds: venereUrbinoVariants,
-          mapCoords: { x: 83.5, y: 82.7, floor: 2 },
           order: 18,
         },
         {
@@ -1665,7 +1671,6 @@ async function seed() {
           type: 'main_item',
           title: 'Medusa — Caravaggio',
           itemIds: medusaVariants,
-          mapCoords: { x: 73.6, y: 19.2, floor: 2 },
           order: 20,
         },
         {
@@ -1680,7 +1685,6 @@ async function seed() {
           type: 'main_item',
           title: 'Sacrificio di Isacco — Caravaggio',
           itemIds: sacrificioVariants,
-          mapCoords: { x: 73.6, y: 19.2, floor: 2 },
           order: 22,
         },
         {
@@ -1695,7 +1699,6 @@ async function seed() {
           type: 'main_item',
           title: 'Giuditta e Oloferne — Artemisia Gentileschi',
           itemIds: giudittaVariants,
-          mapCoords: { x: 73.6, y: 19.2, floor: 2 },
           order: 24,
         },
         {
@@ -1739,7 +1742,6 @@ async function seed() {
           title: 'La Primavera — analisi critica',
           itemIds: primaveraVariants,
           defaultRegister: 'avanzato',
-          mapCoords: { x: 43.9, y: 23.2, floor: 1 },
           order: 2,
         },
         {
@@ -1755,7 +1757,6 @@ async function seed() {
           title: 'La nascita di Venere — analisi critica',
           itemIds: venereVariants,
           defaultRegister: 'avanzato',
-          mapCoords: { x: 43.9, y: 23.2, floor: 1 },
           order: 4,
         },
         {
@@ -1771,7 +1772,6 @@ async function seed() {
           title: 'Annunciazione — analisi critica',
           itemIds: annunciazioneVariants,
           defaultRegister: 'avanzato',
-          mapCoords: { x: 70.1, y: 66.2, floor: 1 },
           order: 6,
         },
         {
@@ -1787,7 +1787,6 @@ async function seed() {
           title: 'Adorazione dei Magi — analisi critica',
           itemIds: adorazioneVariants,
           defaultRegister: 'avanzato',
-          mapCoords: { x: 70.1, y: 66.2, floor: 1 },
           order: 8,
         },
         {
@@ -1803,7 +1802,6 @@ async function seed() {
           title: 'Tondo Doni — analisi critica',
           itemIds: tondoDoniVariants,
           defaultRegister: 'avanzato',
-          mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 10,
         },
         {
@@ -1819,7 +1817,6 @@ async function seed() {
           title: 'Madonna del Cardellino — analisi critica',
           itemIds: madonnaVariants,
           defaultRegister: 'avanzato',
-          mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 12,
         },
         {
@@ -1835,7 +1832,6 @@ async function seed() {
           title: 'Ritratto di Leone X — analisi critica',
           itemIds: leoneXVariants,
           defaultRegister: 'avanzato',
-          mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 14,
         },
         {
@@ -1851,7 +1847,6 @@ async function seed() {
           title: 'Flora — analisi critica',
           itemIds: floraVariants,
           defaultRegister: 'avanzato',
-          mapCoords: { x: 83.5, y: 82.7, floor: 2 },
           order: 16,
         },
         {
@@ -1867,7 +1862,6 @@ async function seed() {
           title: 'Venere di Urbino — analisi critica',
           itemIds: venereUrbinoVariants,
           defaultRegister: 'avanzato',
-          mapCoords: { x: 83.5, y: 82.7, floor: 2 },
           order: 18,
         },
         {
@@ -1883,7 +1877,6 @@ async function seed() {
           title: 'Sacrificio di Isacco — analisi critica',
           itemIds: sacrificioVariants,
           defaultRegister: 'avanzato',
-          mapCoords: { x: 73.6, y: 19.2, floor: 2 },
           order: 20,
         },
         {
@@ -1928,7 +1921,6 @@ async function seed() {
           title: 'La nascita di Venere',
           itemIds: venereVariants,
           defaultRegister: 'elementare',
-          mapCoords: { x: 43.9, y: 23.2, floor: 1 },
           order: 2,
         },
         {
@@ -1944,7 +1936,6 @@ async function seed() {
           title: 'La Primavera',
           itemIds: primaveraVariants,
           defaultRegister: 'elementare',
-          mapCoords: { x: 43.9, y: 23.2, floor: 1 },
           order: 4,
         },
         {
@@ -1960,7 +1951,6 @@ async function seed() {
           title: 'L\'Annunciazione di Leonardo',
           itemIds: annunciazioneVariants,
           defaultRegister: 'elementare',
-          mapCoords: { x: 70.1, y: 66.2, floor: 1 },
           order: 6,
         },
         {
@@ -1976,7 +1966,6 @@ async function seed() {
           title: 'L\'Adorazione dei Magi',
           itemIds: adorazioneVariants,
           defaultRegister: 'elementare',
-          mapCoords: { x: 70.1, y: 66.2, floor: 1 },
           order: 8,
         },
         {
@@ -1992,7 +1981,6 @@ async function seed() {
           title: 'Il Tondo Doni di Michelangelo',
           itemIds: tondoDoniVariants,
           defaultRegister: 'elementare',
-          mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 10,
         },
         {
@@ -2008,7 +1996,6 @@ async function seed() {
           title: 'La Madonna del Cardellino',
           itemIds: madonnaVariants,
           defaultRegister: 'elementare',
-          mapCoords: { x: 56.9, y: 66.2, floor: 1 },
           order: 12,
         },
         {
@@ -2024,7 +2011,6 @@ async function seed() {
           title: 'La Flora di Tiziano',
           itemIds: floraVariants,
           defaultRegister: 'elementare',
-          mapCoords: { x: 83.5, y: 82.7, floor: 2 },
           order: 14,
         },
         {
@@ -2040,7 +2026,6 @@ async function seed() {
           title: 'La Venere di Urbino',
           itemIds: venereUrbinoVariants,
           defaultRegister: 'elementare',
-          mapCoords: { x: 83.5, y: 82.7, floor: 2 },
           order: 16,
         },
         {
@@ -2056,7 +2041,6 @@ async function seed() {
           title: 'La Medusa di Caravaggio',
           itemIds: medusaVariants,
           defaultRegister: 'elementare',
-          mapCoords: { x: 73.6, y: 19.2, floor: 2 },
           order: 18,
         },
         {
@@ -2072,7 +2056,6 @@ async function seed() {
           title: 'Giuditta e Oloferne',
           itemIds: giudittaVariants,
           defaultRegister: 'elementare',
-          mapCoords: { x: 73.6, y: 19.2, floor: 2 },
           order: 20,
         },
         {
@@ -2092,19 +2075,27 @@ async function seed() {
     Visit.findOne({ slug: 'uffizi-per-famiglie' }).lean(),
   ]);
 
-  // I literal storici del seed avevano mapCoords sulla tappa. Le coordinate
-  // sono ora sull'opera; qui completiamo il riferimento diretto artworkId
-  // deducendolo dagli item gia' assegnati alla tappa.
-  const itemArtworkById = new Map(storedItems.map((item) => [item.id, item.artworkId]));
+  // Ogni tappa conserva solo il riferimento all'opera; la sua posizione è
+  // configurazione statica del Navigator in museum.config.json.
+  const itemById = new Map(storedItems.map((item) => [item.id, item]));
   await Promise.all(
     storedVisits.map(async (visit) => {
       const steps = visit.steps.map((step) => {
         if (!['main_item', 'optional_item'].includes(step.type)) return step;
-        const artworkIds = [...new Set((step.itemIds || []).map((id) => itemArtworkById.get(id)).filter(Boolean))];
+        const artworkIds = [...new Set((step.itemIds || []).map((id) => itemById.get(id)?.artworkId).filter(Boolean))];
         if (artworkIds.length !== 1) {
           throw new Error(`Seed inconsistente: impossibile risolvere l'opera della tappa "${step.title}"`);
         }
-        return { ...step, artworkId: artworkIds[0] };
+        const defaultItem = seedDefaultItem(step, itemById);
+        if (!defaultItem) {
+          throw new Error(`Seed inconsistente: impossibile risolvere l'item iniziale della tappa "${step.title}"`);
+        }
+        return {
+          ...step,
+          artworkId: artworkIds[0],
+          defaultItemId: defaultItem.id,
+          defaultRegister: defaultItem.classification?.languageRegister,
+        };
       });
       await Visit.updateOne({ id: visit.id }, { $set: { steps } });
     })
